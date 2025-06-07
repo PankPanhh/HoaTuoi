@@ -59,6 +59,10 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [user, setUser] = useState<any>(null);
+  const [coupon, setCoupon] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [couponSuccess, setCouponSuccess] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,14 +77,37 @@ export default function CheckoutPage() {
         senderPhone: userData.phone || '',
       }));
     }
+    // Lấy mã giảm giá từ localStorage nếu có
+    const couponData = localStorage.getItem('cart-coupon');
+    if (couponData) {
+      const { code, discount } = JSON.parse(couponData);
+      setCoupon(code);
+      setCouponDiscount(discount);
+    }
   }, []);
+
+  // Xử lý nhập mã giảm giá
+  const handleApplyCoupon = () => {
+    setCouponError('');
+    setCouponSuccess('');
+    if (coupon.trim().toUpperCase() === 'SALE30') {
+      setCouponDiscount(0.3);
+      setCouponSuccess('Áp dụng mã giảm giá thành công!');
+      localStorage.setItem('cart-coupon', JSON.stringify({ code: 'SALE30', discount: 0.3 }));
+    } else {
+      setCouponDiscount(0);
+      setCouponError('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+      localStorage.removeItem('cart-coupon');
+    }
+  };
 
   const total = cart.reduce((sum, item) => sum + (item.product.price * (1 - (item.product.promotion ?? 0) / 100)) * item.quantity, 0);
   const isFirstOrder = user ? getIsFirstOrder(user) : false;
   const shippingFee = form.recipientAddress ? getShippingFee(form.recipientAddress) : 0;
   const discount = isFirstOrder ? 0.2 : 0;
   const discountAmount = total * discount;
-  const finalTotal = total - discountAmount + shippingFee;
+  const couponAmount = total * couponDiscount;
+  const finalTotal = total - discountAmount - couponAmount + shippingFee;
 
   const handleChange = (field: string, value: string | boolean) => {
     setForm(f => ({ ...f, [field]: value }));
@@ -111,6 +138,8 @@ export default function CheckoutPage() {
       return;
     }
     setLoading(true);
+    // Lưu coupon vào đơn hàng nếu có
+    const couponInfo = couponDiscount > 0 ? { code: coupon, percent: couponDiscount * 100, amount: couponAmount, note: 'Đã áp dụng mã giảm giá SALE30.' } : null;
     if (form.paymentMethod === 'online') {
       setTimeout(async () => {
         setLoading(false);
@@ -130,13 +159,14 @@ export default function CheckoutPage() {
               amount: discountAmount,
               note: 'Đã áp dụng giảm giá 20% cho đơn hàng đầu tiên.'
             } : null,
+            couponApplied: couponInfo,
             shippingFee,
             finalTotal,
           };
           orders[user.email] = [newOrder, ...userOrders];
           localStorage.setItem('orders', JSON.stringify(orders));
-          localStorage.setItem('last-order', JSON.stringify(newOrder)); // Lưu đơn hàng cuối cùng
-          await saveOrderToDB(user.email, newOrder); // Lưu vào mock-db
+          localStorage.setItem('last-order', JSON.stringify(newOrder));
+          await saveOrderToDB(user.email, newOrder);
           try {
             const res = await fetch(`/api/users?email=${encodeURIComponent(user.email)}`);
             if (res.ok) {
@@ -146,6 +176,7 @@ export default function CheckoutPage() {
           } catch {}
         }
         localStorage.removeItem('cart');
+        localStorage.removeItem('cart-coupon');
         setCart([]);
         setTimeout(() => navigate('/'), 2000);
       }, 1800);
@@ -168,13 +199,14 @@ export default function CheckoutPage() {
               amount: discountAmount,
               note: 'Đã áp dụng giảm giá 20% cho đơn hàng đầu tiên.'
             } : null,
+            couponApplied: couponInfo,
             shippingFee,
             finalTotal,
           };
           orders[user.email] = [newOrder, ...userOrders];
           localStorage.setItem('orders', JSON.stringify(orders));
-          localStorage.setItem('last-order', JSON.stringify(newOrder)); // Lưu đơn hàng cuối cùng
-          await saveOrderToDB(user.email, newOrder); // Lưu vào mock-db
+          localStorage.setItem('last-order', JSON.stringify(newOrder));
+          await saveOrderToDB(user.email, newOrder);
           try {
             const res = await fetch(`/api/users?email=${encodeURIComponent(user.email)}`);
             if (res.ok) {
@@ -184,6 +216,7 @@ export default function CheckoutPage() {
           } catch {}
         }
         localStorage.removeItem('cart');
+        localStorage.removeItem('cart-coupon');
         setCart([]);
         setTimeout(() => navigate('/'), 2000);
       }, 1800);
@@ -503,20 +536,51 @@ export default function CheckoutPage() {
                 </Typography>
               </Box>
             )}
-            {/* Hiển thị lịch sử đơn hàng có giảm giá */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <TextField
+                label="Nhập mã giảm giá"
+                size="small"
+                value={coupon}
+                onChange={e => setCoupon(e.target.value)}
+                sx={{ width: 220 }}
+                disabled={!!couponDiscount}
+              />
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleApplyCoupon}
+                disabled={!!couponDiscount || !coupon.trim()}
+                sx={{ fontWeight: 700, borderRadius: 2 }}
+              >
+                Áp dụng
+              </Button>
+              {couponDiscount > 0 && (
+                <Typography color="success.main" fontWeight={600} ml={1}>Đã áp dụng mã SALE30 (-30%)</Typography>
+              )}
+            </Box>
+            {couponError && <Alert severity="error" sx={{ mb: 1 }}>{couponError}</Alert>}
+            {couponSuccess && <Alert severity="success" sx={{ mb: 1 }}>{couponSuccess}</Alert>}
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography fontWeight={700}>Mã giảm giá SALE30 (-30%):</Typography>
+              <Typography fontWeight={900} color={couponDiscount > 0 ? 'success.main' : 'text.disabled'} fontSize={18} sx={couponDiscount === 0 ? { opacity: 0.6 } : {}}>
+                -{couponAmount.toLocaleString()}₫
+              </Typography>
+            </Box>
+            {/* Hiển thị lịch sử đơn hàng có giảm giá coupon */}
             {user && (
               <Box sx={{ mt: 3 }}>
                 <Divider sx={{ mb: 2 }} />
-                <Typography fontWeight={700} color="#e91e63" mb={1}>Lịch sử đơn hàng đã được giảm giá:</Typography>
+                <Typography fontWeight={700} color="#e91e63" mb={1}>Lịch sử đơn hàng đã áp dụng mã giảm giá:</Typography>
                 {(() => {
                   const orders = JSON.parse(localStorage.getItem('orders') || '{}');
                   const userOrders = orders[user.email] || [];
-                  const discountedOrders = userOrders.filter((o: any) => o.discountApplied && o.discountApplied.percent === 20);
-                  if (discountedOrders.length === 0) return <Typography color="text.secondary">Chưa có đơn nào được giảm giá.</Typography>;
-                  return discountedOrders.map((o: any) => (
-                    <Box key={o.id} sx={{ mb: 1, p: 1.5, borderRadius: 2, bgcolor: '#f1f8e9', border: '1px solid #aed581' }}>
-                      <Typography fontWeight={600} color="#388e3c">Đơn #{o.id} - {new Date(o.createdAt).toLocaleString()}</Typography>
-                      <Typography color="text.secondary" fontSize={14}>Đã giảm: {o.discountApplied.amount.toLocaleString()}₫ ({o.discountApplied.note})</Typography>
+                  const couponOrders = userOrders.filter((o: any) => o.couponApplied && o.couponApplied.code === 'SALE30');
+                  if (couponOrders.length === 0) return <Typography color="text.secondary">Chưa có đơn nào áp dụng mã SALE30.</Typography>;
+                  return couponOrders.map((o: any) => (
+                    <Box key={o.id} sx={{ mb: 1, p: 1.5, borderRadius: 2, bgcolor: '#e3f2fd', border: '1px solid #90caf9' }}>
+                      <Typography fontWeight={600} color="#1976d2">Đơn #{o.id} - {new Date(o.createdAt).toLocaleString()}</Typography>
+                      <Typography color="text.secondary" fontSize={14}>Đã giảm: {o.couponApplied.amount.toLocaleString()}₫ ({o.couponApplied.note})</Typography>
                       <Typography color="text.secondary" fontSize={14}>Tổng thanh toán: {o.finalTotal.toLocaleString()}₫</Typography>
                     </Box>
                   ));

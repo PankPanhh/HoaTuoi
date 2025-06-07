@@ -36,6 +36,10 @@ export default function CartPage() {
   const { user } = useAuth();
   const [cart, setCart] = useState<Array<{ product: Product; quantity: number; note?: string }>>(getCart());
   const [error, setError] = useState('');
+  const [coupon, setCoupon] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [couponSuccess, setCouponSuccess] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
   const navigate = useNavigate();
 
   const updateCart = (newCart: typeof cart) => {
@@ -73,12 +77,27 @@ export default function CartPage() {
     updateCart(newCart);
   };
 
+  // Xử lý nhập mã giảm giá
+  const handleApplyCoupon = () => {
+    setCouponError('');
+    setCouponSuccess('');
+    // Ví dụ: chỉ hỗ trợ mã SALE30 giảm 30%
+    if (coupon.trim().toUpperCase() === 'SALE30') {
+      setCouponDiscount(0.3);
+      setCouponSuccess('Áp dụng mã giảm giá thành công!');
+    } else {
+      setCouponDiscount(0);
+      setCouponError('Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+    }
+  };
+
   const total = cart.reduce((sum, item) => sum + (item.product.price * (1 - (item.product.promotion ?? 0) / 100)) * item.quantity, 0);
   const isFirstOrder = user ? getIsFirstOrder(user) : false;
   const shippingFee = user ? getShippingFee(user.address) : 0;
   const discount = isFirstOrder ? 0.2 : 0;
   const discountAmount = total * discount;
-  const finalTotal = total - discountAmount + shippingFee;
+  const couponAmount = total * couponDiscount;
+  const finalTotal = total - discountAmount - couponAmount + shippingFee;
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 3, borderRadius: 3, boxShadow: 3, background: '#fff' }}>
@@ -94,6 +113,31 @@ export default function CartPage() {
         <Typography align="center" color="text.secondary">Chưa có sản phẩm nào trong giỏ hàng.</Typography>
       ) : (
         <>
+          {/* Nhập mã giảm giá */}
+          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <TextField
+              label="Nhập mã giảm giá"
+              size="small"
+              value={coupon}
+              onChange={e => setCoupon(e.target.value)}
+              sx={{ width: 220 }}
+              disabled={!!couponDiscount}
+            />
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleApplyCoupon}
+              disabled={!!couponDiscount || !coupon.trim()}
+              sx={{ fontWeight: 700, borderRadius: 2 }}
+            >
+              Áp dụng
+            </Button>
+            {couponDiscount > 0 && (
+              <Typography color="success.main" fontWeight={600} ml={1}>Đã áp dụng mã SALE30 (-30%)</Typography>
+            )}
+          </Box>
+          {couponError && <Alert severity="error" sx={{ mb: 1 }}>{couponError}</Alert>}
+          {couponSuccess && <Alert severity="success" sx={{ mb: 1 }}>{couponSuccess}</Alert>}
           {cart.map((item, idx) => (
             <Box key={item.product.id} sx={{
   mb: 2,
@@ -214,6 +258,12 @@ export default function CartPage() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
               <Typography fontWeight={600} color="success.main">Giảm giá 20% (đơn đầu tiên):</Typography>
               <Typography fontWeight={700} color="success.main">- {discountAmount.toLocaleString()}₫</Typography>
+            </Box>
+          )}
+          {couponDiscount > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+              <Typography fontWeight={600} color="success.main">Mã giảm giá SALE30 (-30%):</Typography>
+              <Typography fontWeight={700} color="success.main">- {couponAmount.toLocaleString()}₫</Typography>
             </Box>
           )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>

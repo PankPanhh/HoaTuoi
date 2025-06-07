@@ -99,7 +99,7 @@ export default function ProductListPage() {
             <Typography color="text.secondary" align="center">Không tìm thấy sản phẩm phù hợp.</Typography>
           </Box>
         )}
-        {filtered.map((product, index) => (
+        {filtered.map((product) => (
           <Box key={product.id} sx={{ width: { xs: '100%', sm: '50%', md: '33.333%' }, display: 'flex', p: 1, boxSizing: 'border-box' }}>
             <Card sx={{ borderRadius: 4, boxShadow: 4, height: 380, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
               <Box sx={{ position: 'relative', overflow: 'hidden', height: 180 }}>

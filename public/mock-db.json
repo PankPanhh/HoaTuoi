@@ -108,6 +108,176 @@
       "address": "231, Xã Hòa Lợi, Huyện Châu Thành, Tỉnh Trà Vinh",
       "orderHistory": [
         {
+          "id": 1749329624685,
+          "cart": [
+            {
+              "product": {
+                "id": "6",
+                "name": "Bó Hoa Tulip Đỏ Ngọt Ngào",
+                "description": "Lời tỏ tình ngọt ngào và cháy bỏng, thể hiện tình cảm sâu sắc và bền lâu, rất được yêu thích trong các dịp đặc biệt.",
+                "price": 400000,
+                "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80",
+                "images": [
+                  "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80",
+                  "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=400&q=80"
+                ],
+                "category": "Tulip",
+                "color": "Đỏ",
+                "type": "Hoa bó",
+                "occasion": "Valentine"
+              },
+              "quantity": 1
+            }
+          ],
+          "form": {
+            "recipientName": "panh",
+            "recipientPhone": "0901329709",
+            "recipientAddress": "231, Xã Hòa Lợi, Huyện Châu Thành, Tỉnh Trà Vinh",
+            "recipientNote": "",
+            "senderName": "panh",
+            "senderEmail": "user@gmail.com",
+            "senderPhone": "0901329709",
+            "senderMessage": "",
+            "hideSenderInfo": false,
+            "paymentMethod": "cod"
+          },
+          "status": "Đang xử lý",
+          "createdAt": "2025-06-07T20:53:44.685Z",
+          "discountApplied": null,
+          "couponApplied": {
+            "code": "SALE30",
+            "percent": 30,
+            "amount": 120000,
+            "note": "Đã áp dụng mã giảm giá SALE30."
+          },
+          "shippingFee": 30000,
+          "finalTotal": 310000
+        },
+        {
+          "id": 1749328568702,
+          "cart": [
+            {
+              "product": {
+                "id": "5",
+                "name": "Bó Hoa Hồng Trắng Tinh Khôi",
+                "description": "Mang ý nghĩa tình yêu thuần khiết, trong sáng và khởi đầu mới, thích hợp để bày tỏ sự trân trọng.",
+                "price": 360000,
+                "image": "https://images.unsplash.com/photo-AutreFormat&fit=crop&w=400&q=80",
+                "images": [
+                  "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
+                ],
+                "category": "Hồng",
+                "color": "Trắng",
+                "type": "Hoa bó",
+                "occasion": "Valentine"
+              },
+              "quantity": 1
+            },
+            {
+              "product": {
+                "id": "19",
+                "name": "Bó Hoa Tulip Hồng & Trắng Dịu Dàng",
+                "description": "Sự kết hợp hài hòa giữa tình yêu dịu dàng và vẻ đẹp trong sáng, thích hợp để tặng người yêu thương.",
+                "price": 430000,
+                "image": "https://images.unsplash.com/photo-1526462725907-2a4c9b1f2b6e?auto=format&fit=crop&w=400&q=80",
+                "images": [
+                  "https://images.unsplash.com/photo-1526462725907-2a4c9b1f2b6e?auto=format&fit=crop&w=400&q=80",
+                  "https://images.unsplash.com/photo-1526462725907-2a4c9b1f2b6e?auto=format&fit=crop&w=400&q=80"
+                ],
+                "category": "Tulip",
+                "color": "Hồng",
+                "type": "Hoa bó",
+                "occasion": "Valentine",
+                "promotion": 25
+              },
+              "quantity": 1
+            }
+          ],
+          "form": {
+            "recipientName": "panh",
+            "recipientPhone": "0901329709",
+            "recipientAddress": "231, Xã Hòa Lợi, Huyện Châu Thành, Tỉnh Trà Vinh",
+            "recipientNote": "",
+            "senderName": "panh",
+            "senderEmail": "user@gmail.com",
+            "senderPhone": "0901329709",
+            "senderMessage": "",
+            "hideSenderInfo": false,
+            "paymentMethod": "cod"
+          },
+          "status": "Đang xử lý",
+          "createdAt": "2025-06-07T20:36:08.702Z",
+          "discountApplied": null,
+          "shippingFee": 30000,
+          "finalTotal": 712500
+        },
+        {
+          "id": 1749328541814,
+          "cart": [
+            {
+              "product": {
+                "id": "5",
+                "name": "Bó Hoa Hồng Trắng Tinh Khôi",
+                "description": "Mang ý nghĩa tình yêu thuần khiết, trong sáng và khởi đầu mới, thích hợp để bày tỏ sự trân trọng.",
+                "price": 360000,
+                "image": "https://images.unsplash.com/photo-AutreFormat&fit=crop&w=400&q=80",
+                "images": [
+                  "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
+                ],
+                "category": "Hồng",
+                "color": "Trắng",
+                "type": "Hoa bó",
+                "occasion": "Valentine"
+              },
+              "quantity": 1
+            },
+            {
+              "product": {
+                "id": "1",
+                "name": "Bó Hoa Hồng Đỏ Lãng Mạn",
+                "description": "Biểu tượng của tình yêu nồng cháy và sự lãng mạn bất tận, món quà ý nghĩa cho mọi khoảnh khắc yêu thương.",
+                "price": 350000,
+                "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+                "images": [
+                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+                  "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+                  "https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=400&q=80"
+                ],
+                "category": "Hồng",
+                "color": "Đỏ",
+                "type": "Hoa bó",
+                "occasion": "Tình yêu",
+                "bestSeller": true,
+                "promotion": 15
+              },
+              "quantity": 1
+            }
+          ],
+          "form": {
+            "recipientName": "panh",
+            "recipientPhone": "0901329709",
+            "recipientAddress": "231, Xã Hòa Lợi, Huyện Châu Thành, Tỉnh Trà Vinh",
+            "recipientNote": "",
+            "senderName": "panh",
+            "senderEmail": "user@gmail.com",
+            "senderPhone": "0901329709",
+            "senderMessage": "",
+            "hideSenderInfo": false,
+            "paymentMethod": "cod"
+          },
+          "status": "Đang xử lý",
+          "createdAt": "2025-06-07T20:35:41.814Z",
+          "discountApplied": {
+            "percent": 20,
+            "amount": 131500,
+            "note": "Đã áp dụng giảm giá 20% cho đơn hàng đầu tiên."
+          },
+          "shippingFee": 30000,
+          "finalTotal": 556000
+        },
+        {
           "id": 1749324701304,
           "cart": [
             {

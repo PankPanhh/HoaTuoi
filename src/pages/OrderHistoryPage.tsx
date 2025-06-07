@@ -87,12 +87,22 @@ export default function OrderHistoryPage() {
                   (Giảm 20%: -{(order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0) * 0.2).toLocaleString()}₫)
                 </Typography>
               )}
+              {order.couponApplied && (
+                <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                  (Mã {order.couponApplied.code}: -{order.couponApplied.amount.toLocaleString()}₫)
+                </Typography>
+              )}
             </Typography>
             <Typography color="text.secondary" fontSize={14}>
               Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee?.toLocaleString()}₫</b>
             </Typography>
             <Typography color="text.secondary" fontSize={14} fontWeight={600}>
               Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal?.toLocaleString()}₫</b>
+              {order.couponApplied && (
+                <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                  (Đã áp dụng mã {order.couponApplied.code})
+                </Typography>
+              )}
             </Typography>
             <Button variant="outlined" color="secondary" sx={{ mt: 1 }} onClick={() => { setSelectedOrder(order); setOpenDetail(true); }}>
               Xem chi tiết
@@ -153,12 +163,22 @@ export default function OrderHistoryPage() {
                     (Giảm 20%: -{(selectedOrder.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0) * 0.2).toLocaleString()}₫)
                   </Typography>
                 )}
+                {selectedOrder.couponApplied && (
+                  <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                    (Mã {selectedOrder.couponApplied.code}: -{selectedOrder.couponApplied.amount.toLocaleString()}₫)
+                  </Typography>
+                )}
               </Typography>
               <Typography color="text.secondary" fontSize={14}>
                 Phí ship: <b style={{ color: '#e91e63' }}>{selectedOrder.shippingFee?.toLocaleString()}₫</b>
               </Typography>
               <Typography color="text.secondary" fontSize={14} fontWeight={600}>
                 Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{selectedOrder.finalTotal?.toLocaleString()}₫</b>
+                {selectedOrder.couponApplied && (
+                  <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                    (Đã áp dụng mã {selectedOrder.couponApplied.code})
+                  </Typography>
+                )}
               </Typography>
             </Box>
           )}
