@@ -8,6 +8,7 @@ import ProfilePage from '../pages/ProfilePage';
 import OrderHistoryPage from '../pages/OrderHistoryPage';
 import AuthPage from '../pages/AuthPage';
 import BestSellerPage from '../pages/PromotionPage';
+import PromotionPage from '../pages/PromotionPage';
 import BlogPost1 from '../pages/BlogPost1';
 import BlogPost2 from '../pages/BlogPost2';
 import BlogPost3 from '../pages/BlogPost3';
@@ -24,6 +25,7 @@ export default function AppRoutes() {
       <Route path="/orders" element={<OrderHistoryPage />} />
       <Route path="/auth/*" element={<AuthPage />} />
       <Route path="/bestseller" element={<BestSellerPage />} />
+      <Route path="/promotion" element={<PromotionPage />} />
       <Route path="/blog/1" element={<BlogPost1 />} />
       <Route path="/blog/2" element={<BlogPost2 />} />
       <Route path="/blog/3" element={<BlogPost3 />} />

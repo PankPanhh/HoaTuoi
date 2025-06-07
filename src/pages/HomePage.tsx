@@ -1,13 +1,18 @@
+import React, { useState } from 'react';
 import { Box, Container, Typography, Card, CardContent, CardMedia, Button, Stack } from '@mui/material';
 import CakeIcon from '@mui/icons-material/Cake';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { allProducts } from '../data/all-products';
-import { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import ReviewSection from '../components/ReviewSection';
 import { Link } from 'react-router-dom';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+
+// Hàm kiểm tra sản phẩm mới (giả định 5 sản phẩm đầu tiên là mới dựa trên thứ tự trong allProducts và không phải bestSeller)
+const isNewProduct = (product: typeof allProducts[0], index: number) => !product.bestSeller && index < 5;
 
 const bannerUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
 
@@ -19,10 +24,10 @@ const categories = [
 ];
 
 // Giữ nguyên sản phẩm mới nhất
-const featuredFlowers = allProducts.slice(0, 5); // Lấy 5 sản phẩm mới nhất
+const featuredFlowers = allProducts.filter((p) => !p.bestSeller).slice(0, 3); // Lấy 3 sản phẩm mới nhất không phải bestSeller
 
 // Thêm sản phẩm khuyến mãi
-const promotedFlowers = allProducts.filter((flower) => (flower.promotion ?? 0) > 0).slice(0, 10); // Lấy 5 sản phẩm khuyến mãi đầu tiên
+const promotedFlowers = allProducts.filter((flower) => (flower.promotion ?? 0) > 0).slice(0, 6); // Lấy 6 sản phẩm khuyến mãi đầu tiên
 
 // Sample blog posts
 const blogPosts = [
@@ -57,9 +62,125 @@ const blogPosts = [
 
 export default function HomePage() {
   const [showPromo, setShowPromo] = useState(true);
+  const [copied, setCopied] = useState(false);
+  // Banner carousel state
+  const banners = [
+    {
+      image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80',
+      content: (
+        <Typography variant="h5" sx={{ color: '#e91e63', fontWeight: 900, fontSize: { xs: 18, md: 28 }, letterSpacing: 1, textShadow: '0 2px 12px #fff, 0 2px 16px #e91e634' }}>
+          Nhập mã <Box component="span" sx={{ background: '#e91e63', color: '#fff', px: 2, py: 0.7, borderRadius: 2, fontWeight: 900, fontSize: 22, mx: 1, letterSpacing: 2, boxShadow: '0 2px 8px #e91e634' }}>SALE30</Box> để giảm ngay 30% tổng đơn hàng!
+        </Typography>
+      ),
+      button: (
+        <Button
+          variant="contained"
+          color="secondary"
+          sx={{ borderRadius: 99, fontWeight: 700, fontSize: 18, px: 3, py: 1.2, boxShadow: '0 2px 12px #f8bbd0', background: '#e91e63', color: '#fff', mt: 2, '&:hover': { background: '#ff9800', color: '#fff', boxShadow: '0 4px 16px #ff9800a0' } }}
+          onClick={() => {
+            navigator.clipboard.writeText('SALE30');
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }}
+        >
+          Sao chép mã
+        </Button>
+      ),
+      extra: copied && (
+        <Box sx={{ position: 'absolute', top: 18, right: 36, background: '#fff', color: '#e91e63', px: 2, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 16, boxShadow: 2, zIndex: 2, transition: 'opacity 0.2s', opacity: 1 }}>
+          Đã sao chép!
+        </Box>
+      )
+    },
+    {
+      image: bannerUrl,
+      content: (
+        <>
+          <Typography variant="h3" fontWeight={800} color="#e91e63" sx={{ mt: { xs: 2, md: 0 }, textShadow: '0 2px 16px #fff, 0 2px 16px #e91e634', fontSize: { xs: 22, md: 36 } }}>
+            Ưu đãi tháng 6: Giảm 20% cho đơn đầu tiên!
+          </Typography>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 2, textShadow: '0 2px 8px #fff' }}>
+            Giao hoa tận nơi, nhanh chóng, miễn phí khu vực nội thành.
+          </Typography>
+        </>
+      ),
+      button: (
+        <Button variant="contained" color="secondary" size="large" href="/products" sx={{ width: { xs: '100%', sm: 'auto' }, fontWeight: 800, fontSize: 18, borderRadius: 99, px: 4, py: 1.2, mt: 2, boxShadow: '0 2px 12px #f8bbd0', background: '#e91e63', color: '#fff', '&:hover': { background: '#ff9800', color: '#fff', boxShadow: '0 4px 16px #ff9800a0' } }}>
+          Mua ngay
+        </Button>
+      ),
+      extra: null
+    }
+  ];
+  const [bannerIdx, setBannerIdx] = useState(0);
+  const [hoverBanner, setHoverBanner] = useState(false);
+  // Auto slide effect
+  React.useEffect(() => {
+    if (!hoverBanner) {
+      const timer = setInterval(() => {
+        setBannerIdx(idx => (idx + 1) % banners.length);
+      }, 3500);
+      return () => clearInterval(timer);
+    }
+  }, [hoverBanner, banners.length]);
 
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fffbe7 0%, #ffe0ec 100%)' }}>
+      {/* Banner carousel đẹp hơn */}
+      <Box
+        sx={{
+          width: '100%',
+          height: { xs: 200, md: 360 },
+          background: `url(${banners[bannerIdx].image}) center/cover`,
+          borderRadius: 5,
+          mb: 5,
+          position: 'relative',
+          overflow: 'hidden',
+          boxShadow: 6,
+          transition: 'background-image 0.7s cubic-bezier(.4,2,.6,1)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        onMouseEnter={() => setHoverBanner(true)}
+        onMouseLeave={() => setHoverBanner(false)}
+      >
+        {/* Overlay gradient cho text nổi bật */}
+        <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #fffbe7cc 0%, #ffe0ec99 100%)' }} />
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', px: { xs: 2, md: 6 } }}>
+          {banners[bannerIdx].content}
+          {banners[bannerIdx].button}
+        </Container>
+        {banners[bannerIdx].extra}
+        {/* Nút chuyển banner trái/phải đẹp hơn */}
+        {hoverBanner && (
+          <>
+            <Button
+              onClick={e => { e.stopPropagation(); setBannerIdx(idx => (idx - 1 + banners.length) % banners.length); }}
+              sx={{ position: 'absolute', top: '50%', left: 18, transform: 'translateY(-50%)', minWidth: 0, bgcolor: '#fff', color: '#e91e63', borderRadius: '50%', boxShadow: 3, p: 1.2, zIndex: 3, '&:hover': { bgcolor: '#ffe0ec', color: '#ff9800', boxShadow: 6 }, transition: 'all 0.2s' }}
+            >
+              <ArrowBackIosNewIcon sx={{ fontSize: 28 }} />
+            </Button>
+            <Button
+              onClick={e => { e.stopPropagation(); setBannerIdx(idx => (idx + 1) % banners.length); }}
+              sx={{ position: 'absolute', top: '50%', right: 18, transform: 'translateY(-50%)', minWidth: 0, bgcolor: '#fff', color: '#e91e63', borderRadius: '50%', boxShadow: 3, p: 1.2, zIndex: 3, '&:hover': { bgcolor: '#ffe0ec', color: '#ff9800', boxShadow: 6 }, transition: 'all 0.2s' }}
+            >
+              <ArrowForwardIosIcon sx={{ fontSize: 28 }} />
+            </Button>
+          </>
+        )}
+        {/* Dot indicator */}
+        <Box sx={{ position: 'absolute', bottom: 18, left: 0, width: '100%', display: 'flex', justifyContent: 'center', gap: 1.5, zIndex: 4 }}>
+          {banners.map((_, i) => (
+            <Box
+              key={i}
+              onClick={e => { e.stopPropagation(); setBannerIdx(i); }}
+              sx={{ width: bannerIdx === i ? 18 : 10, height: 10, borderRadius: 99, bgcolor: bannerIdx === i ? '#e91e63' : '#fff', boxShadow: bannerIdx === i ? 3 : 1, cursor: 'pointer', transition: 'all 0.22s', border: bannerIdx === i ? '2px solid #ff9800' : '1.5px solid #e91e63', mx: 0.5 }}
+            />
+          ))}
+        </Box>
+      </Box>
       {/* Popup khuyến mãi */}
       {showPromo && (
         <Box sx={{
@@ -93,21 +214,6 @@ export default function HomePage() {
           </Button>
         </Box>
       )}
-      {/* Banner quảng cáo */}
-      <Box sx={{ width: '100%', height: { xs: 180, md: 320 }, background: `url(${bannerUrl}) center/cover`, borderRadius: 4, mb: 4, position: 'relative', overflow: 'hidden', boxShadow: 4 }}>
-        <Box sx={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.45)' }} />
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <Typography variant="h3" fontWeight={700} color="#e91e63" sx={{ mt: { xs: 2, md: 0 } }}>
-            Ưu đãi tháng 6: Giảm 20% cho đơn đầu tiên!
-          </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-            Giao hoa tận nơi, nhanh chóng, miễn phí khu vực nội thành.
-          </Typography>
-          <Button variant="contained" color="secondary" size="large" href="/products" sx={{ width: { xs: '100%', sm: 'auto' } }}>
-            Mua ngay
-          </Button>
-        </Container>
-      </Box>
       {/* Danh mục nổi bật */}
       <Container maxWidth="md" sx={{ mb: 4 }}>
         <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2}>
@@ -141,9 +247,8 @@ export default function HomePage() {
                 },
                 m: { xs: 0.5, sm: 0.8 },
               }}
-              component={cat.label === 'Khuyến Mãi' ? Link : 'a'}
-              to={cat.label === 'Khuyến Mãi' ? '/promotion' : undefined}
-              href={cat.label !== 'Khuyến Mãi' ? `/products?occasion=${encodeURIComponent(cat.label)}` : undefined}
+              component={Link}
+              to={cat.label === 'Khuyến Mãi' ? '/promotion' : `/products?occasion=${encodeURIComponent(cat.label)}`}
             >
               <Box sx={{ mb: 0.3, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>{cat.icon}</Box>
               <Typography fontWeight={600} color="#e91e63" sx={{ fontSize: 13, textAlign: 'center', width: '100%' }}>{cat.label}</Typography>
@@ -168,9 +273,11 @@ export default function HomePage() {
                     alt={flower.name}
                     sx={{ objectFit: 'cover', width: '100%', height: '100%', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)', '&:hover': { transform: 'scale(1.18)' } }}
                   />
-                  <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: '#00bcd4', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
-                    Mới
-                  </Box>
+                  {isNewProduct(flower, allProducts.findIndex(p => p.id === flower.id)) && (
+                    <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: '#00bcd4', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
+                      Mới
+                    </Box>
+                  )}
                 </Box>
                 <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', p: 2.2 }}>
                   <div>
