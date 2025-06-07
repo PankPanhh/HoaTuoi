@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Box, Container, Typography, Grid, Card, CardContent, CardMedia, Button, Stack, TextField, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { Box, Container, Typography, Card, CardContent, CardMedia, Button, Stack, TextField, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import type { Product } from '../types';
 import { allProducts } from '../data/all-products';
 
-const occasions = ['Tất cả', 'Sinh nhật', 'Khai trương', 'Lễ tình nhân', 'Valentine'];
-const categories = ['Tất cả', 'Hồng', 'Lan', 'Hướng dương', 'Cẩm chướng'];
-const colors = ['Tất cả', 'Đỏ', 'Hồng', 'Vàng', 'Trắng'];
-const types = ['Tất cả', 'Hoa bó', 'Hoa giỏ', 'Hoa chậu'];
+const occasions = ['Tất cả', 'Sinh nhật', 'Khai trương', 'Lễ tình nhân', 'Valentine', 'Tình yêu', 'Tốt nghiệp', 'Giáng Sinh', 'Hoa cưới'];
+export const categories = ['Tất cả', 'Hồng', 'Lan', 'Hướng dương', 'Cẩm chướng', 'Tulip', 'Lily', 'Đồng tiền', 'Baby', 'Cẩm tú cầu', 'Cúc', 'Cát Tường', 'Trạng Nguyên', 'Khác'];
+export const colors = ['Tất cả', 'Đỏ', 'Hồng', 'Vàng', 'Trắng', 'Xanh', 'Tím'];
+export const types = ['Tất cả', 'Hoa bó', 'Hoa giỏ', 'Hoa chậu', 'Hộp hoa', 'Hoa kệ'];
 const sortOptions = [
   { value: 'newest', label: 'Mới nhất' },
   { value: 'price-asc', label: 'Giá tăng dần' },
@@ -95,7 +95,7 @@ export default function ProductListPage() {
         )}
         {filtered.map(product => (
           <Box key={product.id} sx={{ width: { xs: '100%', sm: '50%', md: '33.333%' }, display: 'flex', p: 1, boxSizing: 'border-box' }}>
-            <Card sx={{ borderRadius: 4, boxShadow: 4, height: 370, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
+            <Card sx={{ borderRadius: 4, boxShadow: 4, height: 380, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
               <Box sx={{ position: 'relative', overflow: 'hidden', height: 180 }}>
                 <CardMedia
                   component="img"
@@ -104,17 +104,85 @@ export default function ProductListPage() {
                   alt={product.name}
                   sx={{ objectFit: 'cover', width: '100%', height: '100%', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)', '&:hover': { transform: 'scale(1.18)' } }}
                 />
+                {product.bestSeller && (
+                  <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: '#ff9800', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
+                    Bán chạy
+                  </Box>
+                )}
               </Box>
-              <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 120 }}>
-                <div>
-                  <Typography variant="h6" fontWeight={600} color="#e91e63">{product.name}</Typography>
-                  <Typography variant="body2" color="text.secondary" mb={1} sx={{ minHeight: 36, overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.description}</Typography>
-                </div>
-                <div>
-                  <Typography variant="subtitle1" color="primary" fontWeight={700}>{product.price.toLocaleString()}đ</Typography>
-                  <Button variant="outlined" color="secondary" fullWidth sx={{ mt: 1 }} href={`/products/${product.id}`}>Xem chi tiết</Button>
-                </div>
-              </CardContent>
+              <CardContent sx={{
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  minHeight: 120,
+  p: 1.2,
+}}>
+  <div>
+    <Typography
+      variant="h6"
+      fontWeight={600}
+      color="#e91e63"
+      sx={{
+        fontSize: 17,
+        mb: 0.3,
+        lineHeight: 1.2,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        maxWidth: '100%',
+        display: 'block',
+        '@media (max-width: 600px)': {
+          fontSize: 15,
+        },
+      }}
+      title={product.name}
+    >
+      {product.name}
+    </Typography>
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      mb={0.7}
+      sx={{
+        minHeight: 31,
+        fontSize: 15,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        lineHeight: 1.3,
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        maxHeight: 42,
+        '@media (max-width: 600px)': {
+          fontSize: 13,
+        },
+      }}
+      title={product.description}
+    >
+      {product.description}
+    </Typography>
+  </div>
+  <div>
+    <Typography
+      variant="subtitle1"
+      color="primary"
+      fontWeight={700}
+      sx={{ fontSize: 16, lineHeight: 1.2, '@media (max-width: 600px)': { fontSize: 14 } }}
+    >
+      {product.price.toLocaleString()}đ
+    </Typography>
+    <Button
+      variant="outlined"
+      color="secondary"
+      fullWidth
+      sx={{ mt: 0.7, fontSize: 15, py: 0.7, minHeight: 0, '@media (max-width: 600px)': { fontSize: 13 } }}
+      href={`/products/${product.id}`}
+    >
+      Xem chi tiết
+    </Button>
+  </div>
+</CardContent>
             </Card>
           </Box>
         ))}

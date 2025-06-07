@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { Box, Typography, CardMedia, Button, Chip, Stack, Divider, IconButton, Dialog, TextField, Alert, Snackbar } from '@mui/material';
+import { Box, Typography, CardMedia, Button, Chip, Stack, Divider, IconButton, Dialog, Alert, Snackbar } from '@mui/material';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import CloseIcon from '@mui/icons-material/Close';
 import SwipeableViews from 'react-swipeable-views';
@@ -15,7 +15,6 @@ export default function ProductDetailPage() {
   const [zoomPos, setZoomPos] = useState({ x: 0.5, y: 0.5 });
   const autoPlayRef = useRef<number | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [note, setNote] = useState('');
   const [showAlert, setShowAlert] = useState(false);
 
   // Tự động chuyển ảnh mỗi 3s khi không hover và không zoom
@@ -39,12 +38,13 @@ export default function ProductDetailPage() {
 
   // Thêm vào giỏ hàng
   const handleAddToCart = () => {
+    if (!product) return;
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const idx = cart.findIndex((item: any) => item.product.id === product.id && item.note === note);
+    const idx = cart.findIndex((item: any) => item.product.id === product.id);
     if (idx !== -1) {
       cart[idx].quantity += quantity;
     } else {
-      cart.push({ product, quantity, note });
+      cart.push({ product, quantity });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
     setShowAlert(true);
@@ -146,7 +146,7 @@ export default function ProductDetailPage() {
               +
             </Button>
           </Stack>
-          
+
           <Button variant="contained" color="secondary" size="large" sx={{ fontWeight: 600, px: 4 }} onClick={handleAddToCart}>
             Thêm vào giỏ hàng
           </Button>
