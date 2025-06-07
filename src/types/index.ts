@@ -19,6 +19,7 @@ export interface Product {
   type: string;
   occasion: string;
   bestSeller?: boolean;
+  promotion?: number; // Thêm trường promotion cho sản phẩm khuyến mãi
 }
 
 export interface CartItem {

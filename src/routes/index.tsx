@@ -7,7 +7,7 @@ import CheckoutPage from '../pages/CheckoutPage';
 import ProfilePage from '../pages/ProfilePage';
 import OrderHistoryPage from '../pages/OrderHistoryPage';
 import AuthPage from '../pages/AuthPage';
-import BestSellerPage from '../pages/BestSellerPage';
+import BestSellerPage from '../pages/PromotionPage';
 import BlogPost1 from '../pages/BlogPost1';
 import BlogPost2 from '../pages/BlogPost2';
 import BlogPost3 from '../pages/BlogPost3';

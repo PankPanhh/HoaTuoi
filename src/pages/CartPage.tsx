@@ -73,7 +73,7 @@ export default function CartPage() {
     updateCart(newCart);
   };
 
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const total = cart.reduce((sum, item) => sum + (item.product.price * (1 - (item.product.promotion ?? 0) / 100)) * item.quantity, 0);
   const isFirstOrder = user ? getIsFirstOrder(user) : false;
   const shippingFee = user ? getShippingFee(user.address) : 0;
   const discount = isFirstOrder ? 0.2 : 0;
@@ -112,8 +112,21 @@ export default function CartPage() {
               <img src={item.product.image} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 12, boxShadow: '0 2px 8px #e91e6322' }} />
               <Box sx={{ flex: 1, minWidth: 180 }}>
                 <Typography fontWeight={700} color="#e91e63">{item.product.name}</Typography>
-                <Typography color="text.secondary">{item.product.price.toLocaleString()}₫ / sản phẩm</Typography>
-                <Typography color="text.secondary" fontSize={14}>Tổng: <b>{(item.product.price * item.quantity).toLocaleString()}₫</b></Typography>
+                <Typography color="text.secondary">
+                  {item.product.promotion ? (
+                    <>
+                      {(item.product.price * (1 - (item.product.promotion ?? 0) / 100)).toLocaleString()}₫ / sản phẩm
+                      <Typography component="span" color="text.secondary" sx={{ textDecoration: 'line-through', ml: 1, fontSize: 13 }}>
+                        {item.product.price.toLocaleString()}₫
+                      </Typography>
+                    </>
+                  ) : (
+                    <>{item.product.price.toLocaleString()}₫ / sản phẩm</>
+                  )}
+                </Typography>
+                <Typography color="text.secondary" fontSize={14}>
+                  Tổng: <b>{((item.product.price * (1 - (item.product.promotion ?? 0) / 100)) * item.quantity).toLocaleString()}₫</b>
+                </Typography>
                 <TextField
                   label="Ghi chú (tuỳ chọn: Thêm thiệp, nơ, lời chúc...)"
                   size="small"

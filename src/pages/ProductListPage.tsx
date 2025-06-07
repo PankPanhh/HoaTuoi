@@ -22,13 +22,19 @@ function sortProducts(list: (Product & { images: string[] })[], sort: string) {
     case 'price-desc':
       return [...list].sort((a, b) => b.price - a.price);
     case 'newest':
-      return [...list]; // demo: giữ nguyên thứ tự
+      return [...list]; // demo: giữ nguyên thứ tự (có thể sắp xếp theo dateAdded nếu có)
     case 'best-seller':
-      return [...list]; // demo: giữ nguyên thứ tự
+      return [
+        ...list.filter(p => p.bestSeller), // Đưa sản phẩm bán chạy lên đầu
+        ...list.filter(p => !p.bestSeller), // Sau đó là các sản phẩm còn lại
+      ];
     default:
       return list;
   }
 }
+
+// Hàm kiểm tra sản phẩm mới (giả định 5 sản phẩm đầu tiên là mới dựa trên thứ tự trong allProducts)
+const isNewProduct = (product: Product & { images: string[] }, index: number) => !product.bestSeller && index < 5;
 
 export default function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -93,7 +99,7 @@ export default function ProductListPage() {
             <Typography color="text.secondary" align="center">Không tìm thấy sản phẩm phù hợp.</Typography>
           </Box>
         )}
-        {filtered.map(product => (
+        {filtered.map((product, index) => (
           <Box key={product.id} sx={{ width: { xs: '100%', sm: '50%', md: '33.333%' }, display: 'flex', p: 1, boxSizing: 'border-box' }}>
             <Card sx={{ borderRadius: 4, boxShadow: 4, height: 380, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
               <Box sx={{ position: 'relative', overflow: 'hidden', height: 180 }}>
@@ -109,80 +115,99 @@ export default function ProductListPage() {
                     Bán chạy
                   </Box>
                 )}
+                {product.promotion && (
+                  <Box sx={{ position: 'absolute', top: 10, right: 10, bgcolor: '#e91e63', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
+                    -{product.promotion}%
+                  </Box>
+                )}
+                {isNewProduct(product, allProducts.findIndex(p => p.id === product.id)) && (
+                  <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: '#00bcd4', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
+                    Mới
+                  </Box>
+                )}
               </Box>
               <CardContent sx={{
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  minHeight: 120,
-  p: 1.2,
-}}>
-  <div>
-    <Typography
-      variant="h6"
-      fontWeight={600}
-      color="#e91e63"
-      sx={{
-        fontSize: 17,
-        mb: 0.3,
-        lineHeight: 1.2,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        maxWidth: '100%',
-        display: 'block',
-        '@media (max-width: 600px)': {
-          fontSize: 15,
-        },
-      }}
-      title={product.name}
-    >
-      {product.name}
-    </Typography>
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      mb={0.7}
-      sx={{
-        minHeight: 31,
-        fontSize: 15,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        lineHeight: 1.3,
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical',
-        maxHeight: 42,
-        '@media (max-width: 600px)': {
-          fontSize: 13,
-        },
-      }}
-      title={product.description}
-    >
-      {product.description}
-    </Typography>
-  </div>
-  <div>
-    <Typography
-      variant="subtitle1"
-      color="primary"
-      fontWeight={700}
-      sx={{ fontSize: 16, lineHeight: 1.2, '@media (max-width: 600px)': { fontSize: 14 } }}
-    >
-      {product.price.toLocaleString()}đ
-    </Typography>
-    <Button
-      variant="outlined"
-      color="secondary"
-      fullWidth
-      sx={{ mt: 0.7, fontSize: 15, py: 0.7, minHeight: 0, '@media (max-width: 600px)': { fontSize: 13 } }}
-      href={`/products/${product.id}`}
-    >
-      Xem chi tiết
-    </Button>
-  </div>
-</CardContent>
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 120,
+                p: 1.2,
+              }}>
+                <div>
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    color="#e91e63"
+                    sx={{
+                      fontSize: 17,
+                      mb: 0.3,
+                      lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '100%',
+                      display: 'block',
+                      '@media (max-width: 600px)': {
+                        fontSize: 15,
+                      },
+                    }}
+                    title={product.name}
+                  >
+                    {product.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    mb={0.7}
+                    sx={{
+                      minHeight: 31,
+                      fontSize: 15,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      lineHeight: 1.3,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      maxHeight: 42,
+                      '@media (max-width: 600px)': {
+                        fontSize: 13,
+                      },
+                    }}
+                    title={product.description}
+                  >
+                    {product.description}
+                  </Typography>
+                </div>
+                <div>
+                  <Typography
+                    variant="subtitle1"
+                    color="primary"
+                    fontWeight={700}
+                    sx={{ fontSize: 16, lineHeight: 1.2, '@media (max-width: 600px)': { fontSize: 14 } }}
+                  >
+                    {product.promotion ? (
+                      <>
+                        {(product.price * (1 - (product.promotion ?? 0) / 100)).toLocaleString()}đ
+                        <Typography component="span" color="text.secondary" sx={{ textDecoration: 'line-through', ml: 1, fontSize: 14 }}>
+                          {product.price.toLocaleString()}đ
+                        </Typography>
+                      </>
+                    ) : (
+                      <>{product.price.toLocaleString()}đ</>
+                    )}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    fullWidth
+                    sx={{ mt: 0.7, fontSize: 15, py: 0.7, minHeight: 0, '@media (max-width: 600px)': { fontSize: 13 } }}
+                    href={`/products/${product.id}`}
+                  >
+                    Xem chi tiết
+                  </Button>
+                </div>
+              </CardContent>
             </Card>
           </Box>
         ))}

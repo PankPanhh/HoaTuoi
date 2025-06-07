@@ -6,6 +6,8 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { allProducts } from '../data/all-products';
 import { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
+import ReviewSection from '../components/ReviewSection';
+import { Link } from 'react-router-dom';
 
 const bannerUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
 
@@ -13,11 +15,14 @@ const categories = [
   { label: 'Sinh nhật', icon: <CakeIcon sx={{ fontSize: 36, color: '#ab47bc' }} /> },
   { label: 'Tình yêu', icon: <FavoriteIcon sx={{ fontSize: 36, color: '#e91e63' }} /> },
   { label: 'Khai trương', icon: <EmojiEventsIcon sx={{ fontSize: 36, color: '#1976d2' }} /> },
-  { label: 'Bán chạy', icon: <StarIcon sx={{ fontSize: 36, color: '#ff9800' }} /> },
+  { label: 'Khuyến Mãi', icon: <StarIcon sx={{ fontSize: 36, color: '#ff9800' }} /> },
 ];
 
-// Thay featuredFlowers thành sản phẩm mới nhất
-const featuredFlowers = allProducts.slice(0, 3); // Lấy 3 sản phẩm mới nhất (hoặc tuỳ ý)
+// Giữ nguyên sản phẩm mới nhất
+const featuredFlowers = allProducts.slice(0, 5); // Lấy 5 sản phẩm mới nhất
+
+// Thêm sản phẩm khuyến mãi
+const promotedFlowers = allProducts.filter((flower) => (flower.promotion ?? 0) > 0).slice(0, 10); // Lấy 5 sản phẩm khuyến mãi đầu tiên
 
 // Sample blog posts
 const blogPosts = [
@@ -136,8 +141,9 @@ export default function HomePage() {
                 },
                 m: { xs: 0.5, sm: 0.8 },
               }}
-              component="a"
-              href={cat.label === 'Bán chạy' ? '/bestseller' : `/products?occasion=${encodeURIComponent(cat.label)}`}
+              component={cat.label === 'Khuyến Mãi' ? Link : 'a'}
+              to={cat.label === 'Khuyến Mãi' ? '/promotion' : undefined}
+              href={cat.label !== 'Khuyến Mãi' ? `/products?occasion=${encodeURIComponent(cat.label)}` : undefined}
             >
               <Box sx={{ mb: 0.3, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>{cat.icon}</Box>
               <Typography fontWeight={600} color="#e91e63" sx={{ fontSize: 13, textAlign: 'center', width: '100%' }}>{cat.label}</Typography>
@@ -150,36 +156,86 @@ export default function HomePage() {
         <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2}>
           Sản phẩm mới
         </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1 }}>
           {featuredFlowers.map((flower) => (
-            <Card key={flower.id || flower.name} sx={{ borderRadius: 4, boxShadow: 6, width: 320, maxWidth: '90vw', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.04)' } }}>
-              <Box sx={{ position: 'relative', overflow: 'hidden', height: 180 }}>
-                <CardMedia
-                  component="img"
-                  height="180"
-                  image={flower.image}
-                  alt={flower.name}
-                  sx={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                />
-                <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: '#00bcd4', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
-                  Mới
+            <Box key={flower.id || flower.name} sx={{ width: { xs: '100%', sm: '50%', md: '33.333%' }, display: 'flex', p: 1, boxSizing: 'border-box' }}>
+              <Card sx={{ borderRadius: 4, boxShadow: 4, height: 380, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
+                <Box sx={{ position: 'relative', overflow: 'hidden', height: 180 }}>
+                  <CardMedia
+                    component="img"
+                    height="180"
+                    image={flower.image}
+                    alt={flower.name}
+                    sx={{ objectFit: 'cover', width: '100%', height: '100%', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)', '&:hover': { transform: 'scale(1.18)' } }}
+                  />
+                  <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: '#00bcd4', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
+                    Mới
+                  </Box>
                 </Box>
-              </Box>
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} color="#e91e63">
-                  {flower.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mb={1}>
-                  {flower.description}
-                </Typography>
-                <Typography variant="subtitle1" color="primary" fontWeight={700}>
-                  {flower.price.toLocaleString()}đ
-                </Typography>
-                <Button variant="outlined" color="secondary" fullWidth href={`/products/${flower.id}`}>
-                  Xem chi tiết
-                </Button>
-              </CardContent>
-            </Card>
+                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', p: 2.2 }}>
+                  <div>
+                    <Typography variant="h6" fontWeight={600} color="#e91e63" sx={{ fontSize: 17, mb: 0.3, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', display: 'block', '@media (max-width: 600px)': { fontSize: 15 } }} title={flower.name}>
+                      {flower.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" mb={0.7} sx={{ minHeight: 31, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', maxHeight: 42, '@media (max-width: 600px)': { fontSize: 13 } }} title={flower.description}>
+                      {flower.description}
+                    </Typography>
+                  </div>
+                  <div>
+                    <Typography variant="subtitle1" color="primary" fontWeight={700} sx={{ fontSize: 16, lineHeight: 1.2, '@media (max-width: 600px)': { fontSize: 14 } }}>
+                      {flower.price.toLocaleString()}đ
+                    </Typography>
+                    <Button variant="outlined" color="secondary" fullWidth sx={{ mt: 0.7, fontSize: 15, py: 0.7, minHeight: 0, '@media (max-width: 600px)': { fontSize: 13 } }} href={`/products/${flower.id}`}>
+                      Xem chi tiết
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </Box>
+          ))}
+        </Box>
+      </Container>
+      {/* Sản phẩm khuyến mãi */}
+      <Container maxWidth="md" sx={{ mb: 4 }}>
+        <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2}>
+          Sản phẩm khuyến mãi
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1 }}>
+          {promotedFlowers.map((flower) => (
+            <Box key={flower.id || flower.name} sx={{ width: { xs: '100%', sm: '50%', md: '33.333%' }, display: 'flex', p: 1, boxSizing: 'border-box' }}>
+              <Card sx={{ borderRadius: 4, boxShadow: 4, height: 380, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
+                <Box sx={{ position: 'relative', overflow: 'hidden', height: 180 }}>
+                  <CardMedia
+                    component="img"
+                    height="180"
+                    image={flower.image}
+                    alt={flower.name}
+                    sx={{ objectFit: 'cover', width: '100%', height: '100%', transition: 'transform 0.3s cubic-bezier(.4,2,.6,1)', '&:hover': { transform: 'scale(1.18)' } }}
+                  />
+                  <Box sx={{ position: 'absolute', top: 10, left: 10, bgcolor: '#ff5722', color: '#fff', px: 1.5, py: 0.5, borderRadius: 2, fontWeight: 700, fontSize: 13, boxShadow: 2, zIndex: 2 }}>
+                    -{flower.promotion}%
+                  </Box>
+                </Box>
+                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', p: 2.2 }}>
+                  <div>
+                    <Typography variant="h6" fontWeight={600} color="#e91e63" sx={{ fontSize: 17, mb: 0.3, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', display: 'block', '@media (max-width: 600px)': { fontSize: 15 } }} title={flower.name}>
+                      {flower.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" mb={0.7} sx={{ minHeight: 31, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', maxHeight: 42, '@media (max-width: 600px)': { fontSize: 13 } }} title={flower.description}>
+                      {flower.description}
+                    </Typography>
+                  </div>
+                  <div>
+                    <Typography variant="subtitle1" color="primary" fontWeight={700} sx={{ fontSize: 16, lineHeight: 1.2, '@media (max-width: 600px)': { fontSize: 14 } }}>
+                      {(flower.price * (1 - ((flower.promotion ?? 0) / 100))).toLocaleString()}đ <Typography component="span" color="text.secondary" sx={{ textDecoration: 'line-through', ml: 1, fontSize: 14 }}>{flower.price.toLocaleString()}đ</Typography>
+                    </Typography>
+                    <Button variant="outlined" color="secondary" fullWidth sx={{ mt: 0.7, fontSize: 15, py: 0.7, minHeight: 0, '@media (max-width: 600px)': { fontSize: 13 } }} href={`/products/${flower.id}`}>
+                      Xem chi tiết
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </Box>
           ))}
         </Box>
       </Container>
@@ -256,6 +312,10 @@ export default function HomePage() {
             </Box>
           ))}
         </Box>
+      </Container>
+      {/* Đánh giá khách hàng */}
+      <Container maxWidth="md">
+        <ReviewSection />
       </Container>
     </Box>
   );

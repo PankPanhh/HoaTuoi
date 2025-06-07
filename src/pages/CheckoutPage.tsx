@@ -75,7 +75,7 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const total = cart.reduce((sum, item) => sum + (item.product.price * (1 - (item.product.promotion ?? 0) / 100)) * item.quantity, 0);
   const isFirstOrder = user ? getIsFirstOrder(user) : false;
   const shippingFee = form.recipientAddress ? getShippingFee(form.recipientAddress) : 0;
   const discount = isFirstOrder ? 0.2 : 0;
@@ -206,11 +206,20 @@ export default function CheckoutPage() {
               <Box sx={{ flex: 1 }}>
                 <Typography fontWeight={600}>{item.product.name}</Typography>
                 <Typography color="text.secondary" fontSize={14}>
-                  SL: {item.quantity} x {item.product.price.toLocaleString()}₫
+                  SL: {item.quantity} x {item.product.promotion ? (
+                    <>
+                      {(item.product.price * (1 - (item.product.promotion ?? 0) / 100)).toLocaleString()}₫
+                      <Typography component="span" color="text.secondary" sx={{ textDecoration: 'line-through', ml: 1, fontSize: 13 }}>
+                        {item.product.price.toLocaleString()}₫
+                      </Typography>
+                    </>
+                  ) : (
+                    <>{item.product.price.toLocaleString()}₫</>
+                  )}
                 </Typography>
               </Box>
               <Typography fontWeight={700} color="#e91e63">
-                {(item.product.price * item.quantity).toLocaleString()}₫
+                {((item.product.price * (1 - (item.product.promotion ?? 0) / 100)) * item.quantity).toLocaleString()}₫
               </Typography>
             </Box>
           ))}
@@ -428,14 +437,23 @@ export default function CheckoutPage() {
                 <Box sx={{ flex: 1 }}>
                   <Typography fontWeight={600}>{item.product.name}</Typography>
                   <Typography color="text.secondary" fontSize={14}>
-                    SL: {item.quantity} x {item.product.price.toLocaleString()}₫
+                    SL: {item.quantity} x {item.product.promotion ? (
+                      <>
+                        {(item.product.price * (1 - (item.product.promotion ?? 0) / 100)).toLocaleString()}₫
+                        <Typography component="span" color="text.secondary" sx={{ textDecoration: 'line-through', ml: 1, fontSize: 13 }}>
+                          {item.product.price.toLocaleString()}₫
+                        </Typography>
+                      </>
+                    ) : (
+                      <>{item.product.price.toLocaleString()}₫</>
+                    )}
                   </Typography>
                   {item.note && (
                     <Typography color="text.secondary" fontSize={13}>Ghi chú: {item.note}</Typography>
                   )}
                 </Box>
                 <Typography fontWeight={700} color="#e91e63">
-                  {(item.product.price * item.quantity).toLocaleString()}₫
+                  {((item.product.price * (1 - (item.product.promotion ?? 0) / 100)) * item.quantity).toLocaleString()}₫
                 </Typography>
               </Box>
             ))}

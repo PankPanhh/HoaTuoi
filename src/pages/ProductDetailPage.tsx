@@ -122,7 +122,18 @@ export default function ProductDetailPage() {
             <Chip label={product.type} color="default" />
             <Chip label={product.occasion} color="success" />
           </Stack>
-          <Typography variant="h5" color="primary" fontWeight={700} mb={2}>{product.price.toLocaleString()}đ</Typography>
+          <Typography variant="h5" color="primary" fontWeight={700} mb={2}>
+            {product.promotion ? (
+              <>
+                {(product.price * (1 - (product.promotion ?? 0) / 100)).toLocaleString()}đ
+                <Typography component="span" color="text.secondary" sx={{ textDecoration: 'line-through', ml: 1, fontSize: 18 }}>
+                  {product.price.toLocaleString()}đ
+                </Typography>
+              </>
+            ) : (
+              <>{product.price.toLocaleString()}đ</>
+            )}
+          </Typography>
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
             <Button
               variant="outlined"

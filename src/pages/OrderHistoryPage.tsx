@@ -8,9 +8,6 @@ const STATUS_STEPS = [
   'Đã giao hàng',
 ];
 
-// Giả sử phí ship cố định (có thể thay đổi theo logic kinh doanh)
-const SHIPPING_FEE = 30000;
-
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [openDetail, setOpenDetail] = useState(false);
@@ -24,21 +21,8 @@ export default function OrderHistoryPage() {
         .then(freshUser => {
           localStorage.setItem('current-user', JSON.stringify(freshUser));
           if (Array.isArray(freshUser.orderHistory)) {
-            const updatedOrders = freshUser.orderHistory.map((order: any, index: number) => {
-              const originalTotal = order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0);
-              // Giả sử đơn đầu tiên là đơn có index 0 (dựa trên thứ tự mảng orderHistory, sớm nhất trước)
-              const isFirstOrder = index === 0;
-              const discount = isFirstOrder ? originalTotal * 0.2 : 0; // Giảm 20% cho đơn đầu tiên
-              const shippingFee = order.form.recipientAddress ? (order.form.recipientAddress.toLowerCase().includes('hà nội') || order.form.recipientAddress.toLowerCase().includes('tp hcm') || order.form.recipientAddress.toLowerCase().includes('thành phố hồ chí minh') ? 0 : SHIPPING_FEE) : SHIPPING_FEE;
-              const finalTotal = originalTotal - discount + shippingFee;
-              return {
-                ...order,
-                discountApplied: isFirstOrder,
-                shippingFee,
-                finalTotal,
-              };
-            });
-            setOrders(updatedOrders);
+            // Không tính toán lại, dùng trực tiếp các trường đã có trong order
+            setOrders(freshUser.orderHistory);
           } else {
             setOrders([]);
           }
@@ -80,10 +64,18 @@ export default function OrderHistoryPage() {
                   <Typography fontWeight={600}>{item.product.name}</Typography>
                   <Typography color="text.secondary" fontSize={14}>
                     SL: {item.quantity} x {item.product.price.toLocaleString()}₫
+                    {item.product.promotion && (
+                      <span style={{ color: '#43a047', marginLeft: 8 }}>
+                        (Giảm {item.product.promotion}% còn {(item.product.price * (1 - item.product.promotion / 100)).toLocaleString()}₫)
+                      </span>
+                    )}
                   </Typography>
                 </Box>
                 <Typography fontWeight={700} color="#e91e63">
-                  {(item.product.price * item.quantity).toLocaleString()}₫
+                  {item.product.promotion
+                    ? (item.product.price * (1 - item.product.promotion / 100) * item.quantity).toLocaleString()
+                    : (item.product.price * item.quantity).toLocaleString()
+                  }₫
                 </Typography>
               </Box>
             ))}
@@ -97,10 +89,10 @@ export default function OrderHistoryPage() {
               )}
             </Typography>
             <Typography color="text.secondary" fontSize={14}>
-              Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee.toLocaleString()}₫</b>
+              Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee?.toLocaleString()}₫</b>
             </Typography>
             <Typography color="text.secondary" fontSize={14} fontWeight={600}>
-              Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal.toLocaleString()}₫</b>
+              Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal?.toLocaleString()}₫</b>
             </Typography>
             <Button variant="outlined" color="secondary" sx={{ mt: 1 }} onClick={() => { setSelectedOrder(order); setOpenDetail(true); }}>
               Xem chi tiết
@@ -117,7 +109,7 @@ export default function OrderHistoryPage() {
               <Typography fontWeight={600} color="#e91e63" mb={1}>
                 Đơn #{selectedOrder.id} - {new Date(selectedOrder.createdAt).toLocaleString('vi-VN')}
               </Typography>
-              <Typography fontWeight={600} mb={1}>Trạng thái: <span style={{ color: '#e91e63' }}>{selectedOrder.status}</span></Typography>
+              <Typography fontWeight={600} mb={1}>Trạng thái: <span style={{ color: selectedOrder.status === 'Đã giao hàng' ? '#43a047' : selectedOrder.status === 'Đang xử lý' ? '#e91e63' : '#fb8c00' }}>{selectedOrder.status}</span></Typography>
               <Typography fontWeight={600} mt={2}>Người nhận:</Typography>
               <Typography>Họ tên: {selectedOrder.form.recipientName}</Typography>
               <Typography>SĐT: {selectedOrder.form.recipientPhone}</Typography>
@@ -138,10 +130,18 @@ export default function OrderHistoryPage() {
                     <Typography fontWeight={600}>{item.product.name}</Typography>
                     <Typography color="text.secondary" fontSize={13}>
                       SL: {item.quantity} x {item.product.price.toLocaleString()}₫
+                      {item.product.promotion && (
+                        <span style={{ color: '#43a047', marginLeft: 8 }}>
+                          (Giảm {item.product.promotion}% còn {(item.product.price * (1 - item.product.promotion / 100)).toLocaleString()}₫)
+                        </span>
+                      )}
                     </Typography>
                   </Box>
                   <Typography fontWeight={700} color="#e91e63">
-                    {(item.product.price * item.quantity).toLocaleString()}₫
+                    {item.product.promotion
+                      ? (item.product.price * (1 - item.product.promotion / 100) * item.quantity).toLocaleString()
+                      : (item.product.price * item.quantity).toLocaleString()
+                    }₫
                   </Typography>
                 </Box>
               ))}
@@ -155,10 +155,10 @@ export default function OrderHistoryPage() {
                 )}
               </Typography>
               <Typography color="text.secondary" fontSize={14}>
-                Phí ship: <b style={{ color: '#e91e63' }}>{selectedOrder.shippingFee.toLocaleString()}₫</b>
+                Phí ship: <b style={{ color: '#e91e63' }}>{selectedOrder.shippingFee?.toLocaleString()}₫</b>
               </Typography>
               <Typography color="text.secondary" fontSize={14} fontWeight={600}>
-                Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{selectedOrder.finalTotal.toLocaleString()}₫</b>
+                Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{selectedOrder.finalTotal?.toLocaleString()}₫</b>
               </Typography>
             </Box>
           )}
