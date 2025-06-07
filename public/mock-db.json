@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "phuong anh",
+      "email": "nguyenphuonganh061024@gmail.com",
+      "password": "12345678",
+      "phone": "0901389609",
+      "address": "",
+      "orderHistory": [],
+      "role": "customer"
+    }
+  ]
+}
