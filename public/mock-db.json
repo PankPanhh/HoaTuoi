@@ -88,6 +88,71 @@
         }
       ],
       "role": "customer"
+    },
+    {
+      "id": 2,
+      "name": "Chi Chi",
+      "email": "npanh5006@gmail.com",
+      "password": "123",
+      "phone": "0384796709",
+      "address": "123 , Xã Ninh Gia, Huyện Đức Trọng, Tỉnh Lâm Đồng",
+      "orderHistory": [],
+      "role": "customer"
+    },
+    {
+      "id": 3,
+      "name": "panh",
+      "email": "user@gmail.com",
+      "password": "123",
+      "phone": "0901329709",
+      "address": "231, Xã Hòa Lợi, Huyện Châu Thành, Tỉnh Trà Vinh",
+      "orderHistory": [
+        {
+          "id": 1749322284461,
+          "cart": [
+            {
+              "product": {
+                "id": "5",
+                "name": "Bó Hoa Hồng Trắng Tinh Khôi",
+                "description": "Mang ý nghĩa tình yêu thuần khiết, trong sáng và khởi đầu mới, thích hợp để bày tỏ sự trân trọng.",
+                "price": 360000,
+                "image": "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+                "images": [
+                  "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+                  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80"
+                ],
+                "category": "Hồng",
+                "color": "Trắng",
+                "type": "Hoa bó",
+                "occasion": "Valentine"
+              },
+              "quantity": 1
+            }
+          ],
+          "form": {
+            "recipientName": "panh",
+            "recipientPhone": "0901329709",
+            "recipientAddress": "231, Xã Hòa Lợi, Huyện Châu Thành, Tỉnh Trà Vinh",
+            "recipientNote": "",
+            "senderName": "panh",
+            "senderEmail": "user@gmail.com",
+            "senderPhone": "0901329709",
+            "senderMessage": "",
+            "hideSenderInfo": false,
+            "paymentMethod": "cod"
+          },
+          "status": "Đang xử lý",
+          "createdAt": "2025-06-07T18:51:24.461Z",
+          "discountApplied": {
+            "percent": 20,
+            "amount": 72000,
+            "note": "Đã áp dụng giảm giá 20% cho đơn hàng đầu tiên."
+          },
+          "shippingFee": 30000,
+          "finalTotal": 318000
+        }
+      ],
+      "role": "customer"
     }
   ]
 }

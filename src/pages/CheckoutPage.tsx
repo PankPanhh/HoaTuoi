@@ -23,6 +23,24 @@ function getCart() {
   }
 }
 
+// --- Ưu đãi & phí ship ---
+function getIsFirstOrder(user: any) {
+  if (!user) return false;
+  const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+  const userOrders = orders[user.email] || [];
+  return userOrders.length === 0;
+}
+
+function getShippingFee(address: string) {
+  if (!address) return 0;
+  // Đơn giản: nếu địa chỉ chứa "Hà Nội" hoặc "TP HCM" => nội thành, miễn phí ship
+  const addressLower = address.toLowerCase();
+  if (addressLower.includes('hà nội') || addressLower.includes('tp hcm') || addressLower.includes('thành phố hồ chí minh')) {
+    return 0;
+  }
+  return 30000;
+}
+
 export default function CheckoutPage() {
   const [cart, setCart] = useState<Array<{ product: Product; quantity: number; note?: string }>>([]);
   const [form, setForm] = useState({
@@ -58,6 +76,11 @@ export default function CheckoutPage() {
   }, []);
 
   const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const isFirstOrder = user ? getIsFirstOrder(user) : false;
+  const shippingFee = form.recipientAddress ? getShippingFee(form.recipientAddress) : 0;
+  const discount = isFirstOrder ? 0.2 : 0;
+  const discountAmount = total * discount;
+  const finalTotal = total - discountAmount + shippingFee;
 
   const handleChange = (field: string, value: string | boolean) => {
     setForm(f => ({ ...f, [field]: value }));
@@ -102,11 +125,18 @@ export default function CheckoutPage() {
             form,
             status: 'Đang xử lý',
             createdAt: new Date().toISOString(),
+            discountApplied: isFirstOrder ? {
+              percent: 20,
+              amount: discountAmount,
+              note: 'Đã áp dụng giảm giá 20% cho đơn hàng đầu tiên.'
+            } : null,
+            shippingFee,
+            finalTotal,
           };
           orders[user.email] = [newOrder, ...userOrders];
           localStorage.setItem('orders', JSON.stringify(orders));
+          localStorage.setItem('last-order', JSON.stringify(newOrder)); // Lưu đơn hàng cuối cùng
           await saveOrderToDB(user.email, newOrder); // Lưu vào mock-db
-          // Lấy lại user mới nhất từ backend và cập nhật localStorage
           try {
             const res = await fetch(`/api/users?email=${encodeURIComponent(user.email)}`);
             if (res.ok) {
@@ -133,11 +163,18 @@ export default function CheckoutPage() {
             form,
             status: 'Đang xử lý',
             createdAt: new Date().toISOString(),
+            discountApplied: isFirstOrder ? {
+              percent: 20,
+              amount: discountAmount,
+              note: 'Đã áp dụng giảm giá 20% cho đơn hàng đầu tiên.'
+            } : null,
+            shippingFee,
+            finalTotal,
           };
           orders[user.email] = [newOrder, ...userOrders];
           localStorage.setItem('orders', JSON.stringify(orders));
+          localStorage.setItem('last-order', JSON.stringify(newOrder)); // Lưu đơn hàng cuối cùng
           await saveOrderToDB(user.email, newOrder); // Lưu vào mock-db
-          // Lấy lại user mới nhất từ backend và cập nhật localStorage
           try {
             const res = await fetch(`/api/users?email=${encodeURIComponent(user.email)}`);
             if (res.ok) {
@@ -154,6 +191,59 @@ export default function CheckoutPage() {
   };
 
   if (cart.length === 0) {
+    // Nếu có last-order thì hiển thị tổng kết đơn hàng vừa đặt
+    const lastOrder = localStorage.getItem('last-order');
+    if (lastOrder) {
+      const order = JSON.parse(lastOrder);
+      return (
+        <Box sx={{ maxWidth: 600, mx: 'auto', mt: 6, p: 3, borderRadius: 4, boxShadow: 3, background: '#fff' }}>
+          <Typography align="center" color="#e91e63" fontWeight={700} mb={2}>Đặt hàng thành công!</Typography>
+          <Typography align="center" color="text.secondary" mb={2}>Tóm tắt đơn hàng vừa đặt:</Typography>
+          <Divider sx={{ mb: 2 }} />
+          {order.cart.map((item: any, idx: number) => (
+            <Box key={item.product.id + idx} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <img src={item.product.image} alt={item.product.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, marginRight: 10 }} />
+              <Box sx={{ flex: 1 }}>
+                <Typography fontWeight={600}>{item.product.name}</Typography>
+                <Typography color="text.secondary" fontSize={14}>
+                  SL: {item.quantity} x {item.product.price.toLocaleString()}₫
+                </Typography>
+              </Box>
+              <Typography fontWeight={700} color="#e91e63">
+                {(item.product.price * item.quantity).toLocaleString()}₫
+              </Typography>
+            </Box>
+          ))}
+          <Divider sx={{ my: 1 }} />
+          <Typography color="text.secondary" fontSize={14}>
+            Tổng cộng: <b style={{ color: '#e91e63' }}>{order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0).toLocaleString()}₫</b>
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Typography fontWeight={700}>Giảm giá (20% đơn đầu tiên):</Typography>
+            <Typography fontWeight={900} color={order.discountApplied ? '#e91e63' : 'text.disabled'} fontSize={18} sx={!order.discountApplied ? { opacity: 0.6 } : {}}>
+              -{order.discountApplied ? order.discountApplied.amount.toLocaleString() : '0'}₫
+            </Typography>
+          </Box>
+          <Typography color="text.secondary" fontSize={14}>
+            Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee.toLocaleString()}₫</b>
+          </Typography>
+          <Typography color="text.secondary" fontSize={14} fontWeight={600}>
+            Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal.toLocaleString()}₫</b>
+          </Typography>
+          {order.discountApplied && (
+            <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: '#e8f5e9', border: '1px solid #c8e6c9' }}>
+              <Typography color="#2e7d32" fontWeight={500} mb={1}>
+                🎉 Bạn đã được giảm giá 20% cho đơn hàng đầu tiên!
+              </Typography>
+              <Typography color="text.secondary" fontSize={14}>
+                (Đã được trừ trực tiếp vào tổng tiền)
+              </Typography>
+            </Box>
+          )}
+          <Button variant="contained" color="secondary" sx={{ mt: 3, fontWeight: 600 }} onClick={() => { localStorage.removeItem('last-order'); navigate('/'); }}>Về trang chủ</Button>
+        </Box>
+      );
+    }
     return (
       <Box sx={{ maxWidth: 600, mx: 'auto', mt: 6, p: 3, borderRadius: 4, boxShadow: 3, background: '#fff' }}>
         <Typography align="center" color="text.secondary">Giỏ hàng trống. Vui lòng chọn sản phẩm trước khi thanh toán.</Typography>
@@ -350,12 +440,71 @@ export default function CheckoutPage() {
               </Box>
             ))}
             <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Typography fontWeight={700}>Tổng cộng:</Typography>
-              <Typography fontWeight={900} color="#e91e63" fontSize={22}>
+              <Typography fontWeight={900} color="#e91e63" fontSize={18}>
                 {total.toLocaleString()}₫
               </Typography>
             </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography fontWeight={700}>Giảm giá (20% đơn đầu tiên):</Typography>
+              <Typography fontWeight={900} color={isFirstOrder ? '#e91e63' : 'text.disabled'} fontSize={18} sx={!isFirstOrder ? { opacity: 0.6 } : {}}>
+                -{discountAmount.toLocaleString()}₫
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography fontWeight={700}>Phí giao hàng:</Typography>
+              <Typography fontWeight={900} color="#e91e63" fontSize={18}>
+                {shippingFee.toLocaleString()}₫
+              </Typography>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography fontWeight={900} fontSize={20}>Tổng thanh toán:</Typography>
+              <Typography fontWeight={900} color="#e91e63" fontSize={22}>
+                {finalTotal.toLocaleString()}₫
+              </Typography>
+            </Box>
+            {isFirstOrder && (
+              <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: '#e8f5e9', border: '1px solid #c8e6c9' }}>
+                <Typography color="#2e7d32" fontWeight={500} mb={1}>
+                  🎉 Chúc mừng! Bạn được giảm giá 20% cho đơn hàng đầu tiên.
+                </Typography>
+                <Typography color="text.secondary" fontSize={14}>
+                  (Đã được trừ trực tiếp vào tổng tiền)
+                </Typography>
+              </Box>
+            )}
+            {shippingFee > 0 && (
+              <Box sx={{ mt: 1, p: 2, borderRadius: 2, bgcolor: '#fff3e0', border: '1px solid #ffe0b2' }}>
+                <Typography color="#e65100" fontWeight={500} mb={1}>
+                  🚚 Phí giao hàng: {shippingFee.toLocaleString()}₫
+                </Typography>
+                <Typography color="text.secondary" fontSize={14}>
+                  (Miễn phí giao hàng cho địa chỉ nội thành: Hà Nội, TP HCM)
+                </Typography>
+              </Box>
+            )}
+            {/* Hiển thị lịch sử đơn hàng có giảm giá */}
+            {user && (
+              <Box sx={{ mt: 3 }}>
+                <Divider sx={{ mb: 2 }} />
+                <Typography fontWeight={700} color="#e91e63" mb={1}>Lịch sử đơn hàng đã được giảm giá:</Typography>
+                {(() => {
+                  const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+                  const userOrders = orders[user.email] || [];
+                  const discountedOrders = userOrders.filter((o: any) => o.discountApplied && o.discountApplied.percent === 20);
+                  if (discountedOrders.length === 0) return <Typography color="text.secondary">Chưa có đơn nào được giảm giá.</Typography>;
+                  return discountedOrders.map((o: any) => (
+                    <Box key={o.id} sx={{ mb: 1, p: 1.5, borderRadius: 2, bgcolor: '#f1f8e9', border: '1px solid #aed581' }}>
+                      <Typography fontWeight={600} color="#388e3c">Đơn #{o.id} - {new Date(o.createdAt).toLocaleString()}</Typography>
+                      <Typography color="text.secondary" fontSize={14}>Đã giảm: {o.discountApplied.amount.toLocaleString()}₫ ({o.discountApplied.note})</Typography>
+                      <Typography color="text.secondary" fontSize={14}>Tổng thanh toán: {o.finalTotal.toLocaleString()}₫</Typography>
+                    </Box>
+                  ));
+                })()}
+              </Box>
+            )}
           </Box>
         </Stack>
       </Paper>

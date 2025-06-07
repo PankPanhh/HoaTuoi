@@ -14,6 +14,24 @@ function getCart() {
   }
 }
 
+// --- Ưu đãi & phí ship ---
+function getIsFirstOrder(user: any) {
+  if (!user) return false;
+  const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+  const userOrders = orders[user.email] || [];
+  return userOrders.length === 0;
+}
+
+function getShippingFee(address: string) {
+  if (!address) return 0;
+  // Đơn giản: nếu địa chỉ chứa "Hà Nội" hoặc "TP HCM" => nội thành, free ship
+  const addressLower = address.toLowerCase();
+  if (addressLower.includes('hà nội') || addressLower.includes('tp hcm') || addressLower.includes('thành phố hồ chí minh')) {
+    return 0;
+  }
+  return 30000;
+}
+
 export default function CartPage() {
   const { user } = useAuth();
   const [cart, setCart] = useState<Array<{ product: Product; quantity: number; note?: string }>>(getCart());
@@ -56,6 +74,11 @@ export default function CartPage() {
   };
 
   const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const isFirstOrder = user ? getIsFirstOrder(user) : false;
+  const shippingFee = user ? getShippingFee(user.address) : 0;
+  const discount = isFirstOrder ? 0.2 : 0;
+  const discountAmount = total * discount;
+  const finalTotal = total - discountAmount + shippingFee;
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 3, borderRadius: 3, boxShadow: 3, background: '#fff' }}>
@@ -173,6 +196,21 @@ export default function CartPage() {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography fontWeight={600}>Tổng cộng:</Typography>
             <Typography fontWeight={700} color="#e91e63" fontSize={20}>{total.toLocaleString()}₫</Typography>
+          </Box>
+          {discount > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+              <Typography fontWeight={600} color="success.main">Giảm giá 20% (đơn đầu tiên):</Typography>
+              <Typography fontWeight={700} color="success.main">- {discountAmount.toLocaleString()}₫</Typography>
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+            <Typography fontWeight={600}>Phí vận chuyển:</Typography>
+            <Typography fontWeight={700}>{shippingFee === 0 ? 'Miễn phí' : shippingFee.toLocaleString() + '₫'}</Typography>
+          </Box>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography fontWeight={700} color="#e91e63">Thành tiền:</Typography>
+            <Typography fontWeight={900} color="#e91e63" fontSize={22}>{finalTotal.toLocaleString()}₫</Typography>
           </Box>
           <Button
   variant="contained"

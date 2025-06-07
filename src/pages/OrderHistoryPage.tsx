@@ -8,6 +8,9 @@ const STATUS_STEPS = [
   'Đã giao hàng',
 ];
 
+// Giả sử phí ship cố định (có thể thay đổi theo logic kinh doanh)
+const SHIPPING_FEE = 30000;
+
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [openDetail, setOpenDetail] = useState(false);
@@ -16,15 +19,26 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('current-user') || 'null');
     if (user && user.email) {
-      // Luôn fetch user mới nhất từ backend để đảm bảo orderHistory cập nhật
       fetch(`/api/users?email=${encodeURIComponent(user.email)}`)
         .then(res => res.ok ? res.json() : user)
         .then(freshUser => {
-          // Luôn cập nhật localStorage với user mới nhất
           localStorage.setItem('current-user', JSON.stringify(freshUser));
-          // Nếu orderHistory là mảng, kể cả rỗng, vẫn setOrders (để tránh lỗi khi orderHistory rỗng)
           if (Array.isArray(freshUser.orderHistory)) {
-            setOrders(freshUser.orderHistory);
+            const updatedOrders = freshUser.orderHistory.map((order: any, index: number) => {
+              const originalTotal = order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0);
+              // Giả sử đơn đầu tiên là đơn có index 0 (dựa trên thứ tự mảng orderHistory, sớm nhất trước)
+              const isFirstOrder = index === 0;
+              const discount = isFirstOrder ? originalTotal * 0.2 : 0; // Giảm 20% cho đơn đầu tiên
+              const shippingFee = order.form.recipientAddress ? (order.form.recipientAddress.toLowerCase().includes('hà nội') || order.form.recipientAddress.toLowerCase().includes('tp hcm') || order.form.recipientAddress.toLowerCase().includes('thành phố hồ chí minh') ? 0 : SHIPPING_FEE) : SHIPPING_FEE;
+              const finalTotal = originalTotal - discount + shippingFee;
+              return {
+                ...order,
+                discountApplied: isFirstOrder,
+                shippingFee,
+                finalTotal,
+              };
+            });
+            setOrders(updatedOrders);
           } else {
             setOrders([]);
           }
@@ -76,6 +90,17 @@ export default function OrderHistoryPage() {
             <Divider sx={{ my: 1 }} />
             <Typography color="text.secondary" fontSize={14}>
               Tổng cộng: <b style={{ color: '#e91e63' }}>{order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0).toLocaleString()}₫</b>
+              {order.discountApplied && (
+                <Typography component="span" color="text.secondary" ml={1} fontWeight={600}>
+                  (Giảm 20%: -{(order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0) * 0.2).toLocaleString()}₫)
+                </Typography>
+              )}
+            </Typography>
+            <Typography color="text.secondary" fontSize={14}>
+              Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee.toLocaleString()}₫</b>
+            </Typography>
+            <Typography color="text.secondary" fontSize={14} fontWeight={600}>
+              Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal.toLocaleString()}₫</b>
             </Typography>
             <Button variant="outlined" color="secondary" sx={{ mt: 1 }} onClick={() => { setSelectedOrder(order); setOpenDetail(true); }}>
               Xem chi tiết
@@ -123,6 +148,17 @@ export default function OrderHistoryPage() {
               <Divider sx={{ my: 1 }} />
               <Typography color="text.secondary" fontSize={14}>
                 Tổng cộng: <b style={{ color: '#e91e63' }}>{selectedOrder.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0).toLocaleString()}₫</b>
+                {selectedOrder.discountApplied && (
+                  <Typography component="span" color="text.secondary" ml={1} fontWeight={600}>
+                    (Giảm 20%: -{(selectedOrder.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0) * 0.2).toLocaleString()}₫)
+                  </Typography>
+                )}
+              </Typography>
+              <Typography color="text.secondary" fontSize={14}>
+                Phí ship: <b style={{ color: '#e91e63' }}>{selectedOrder.shippingFee.toLocaleString()}₫</b>
+              </Typography>
+              <Typography color="text.secondary" fontSize={14} fontWeight={600}>
+                Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{selectedOrder.finalTotal.toLocaleString()}₫</b>
               </Typography>
             </Box>
           )}
