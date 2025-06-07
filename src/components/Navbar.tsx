@@ -24,7 +24,9 @@ export default function Navbar() {
       <Tooltip title={user ? user.name : 'Tài khoản'}>
         <IconButton onClick={handleClick} size="large" sx={{ ml: 1 }}>
           <PersonOutlineIcon sx={{ fontSize: 28, color: '#e91e63' }} />
-          {user && <span style={{ marginLeft: 8, fontWeight: 600, color: '#e91e63' }}>{user.name}</span>}
+          {user && (
+            <span style={{ marginLeft: 4, fontWeight: 500, color: '#e91e63', fontSize: 16, maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block', verticalAlign: 'middle' }}>{user.name}</span>
+          )}
         </IconButton>
       </Tooltip>
       <Menu

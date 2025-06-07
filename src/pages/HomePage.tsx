@@ -3,7 +3,6 @@ import CakeIcon from '@mui/icons-material/Cake';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import { useAuth } from '../features/auth/AuthContext';
 
 const bannerUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
 
@@ -42,17 +41,9 @@ const featuredFlowers = [
 ];
 
 export default function HomePage() {
-  const { user } = useAuth();
   return (
     <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fffbe7 0%, #ffe0ec 100%)' }}>
       {/* Banner quảng cáo */}
-      {user && (
-        <Container maxWidth="md" sx={{ mb: 2 }}>
-          <Typography variant="h5" fontWeight={700} color="#e91e63" align="center">
-            Xin chào, {user.name}!
-          </Typography>
-        </Container>
-      )}
       <Box sx={{ width: '100%', height: { xs: 180, md: 320 }, background: `url(${bannerUrl}) center/cover`, borderRadius: 4, mb: 4, position: 'relative', overflow: 'hidden', boxShadow: 4 }}>
         <Box sx={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.45)' }} />
         <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

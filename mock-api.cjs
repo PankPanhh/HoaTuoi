@@ -44,13 +44,20 @@ app.post('/api/register', (req, res) => {
 
 // Lấy danh sách user
 app.get('/api/users', (req, res) => {
+  const { email } = req.query;
   let db;
   try {
     db = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
   } catch {
     db = { users: [] };
   }
-  res.json({ users: db.users || [] });
+  if (!Array.isArray(db.users)) db.users = [];
+  if (email) {
+    const user = db.users.find(u => u.email === email);
+    if (!user) return res.status(404).json({ message: 'Không tìm thấy user.' });
+    return res.json(user);
+  }
+  res.json({ users: db.users });
 });
 
 // Lưu user đăng nhập (cập nhật thông tin user)
@@ -68,12 +75,37 @@ app.post('/api/save-current-user', (req, res) => {
   if (!Array.isArray(db.users)) db.users = [];
   const idx = db.users.findIndex(u => u.email === user.email);
   if (idx !== -1) {
-    db.users[idx] = { ...db.users[idx], ...user };
+    // Giữ lại orderHistory cũ nếu có
+    const oldOrderHistory = db.users[idx].orderHistory || [];
+    db.users[idx] = { ...db.users[idx], ...user, orderHistory: oldOrderHistory };
   } else {
-    db.users.push(user);
+    db.users.push({ ...user, orderHistory: [] });
   }
   fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
   res.json({ message: 'Đã lưu user đăng nhập.' });
+});
+
+// Thêm endpoint lưu order vào orderHistory của user
+app.post('/api/users/add-order', (req, res) => {
+  const { email, order } = req.body;
+  if (!email || !order) {
+    return res.status(400).json({ message: 'Thiếu thông tin email hoặc order.' });
+  }
+  let db;
+  try {
+    db = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
+  } catch {
+    db = { users: [] };
+  }
+  if (!Array.isArray(db.users)) db.users = [];
+  const idx = db.users.findIndex(u => u.email === email);
+  if (idx === -1) {
+    return res.status(404).json({ message: 'Không tìm thấy user.' });
+  }
+  if (!Array.isArray(db.users[idx].orderHistory)) db.users[idx].orderHistory = [];
+  db.users[idx].orderHistory.unshift(order);
+  fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+  res.json({ message: 'Đã lưu đơn hàng vào orderHistory.' });
 });
 
 app.listen(PORT, () => {

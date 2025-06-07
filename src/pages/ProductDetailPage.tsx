@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { Box, Typography, CardMedia, Button, Chip, Stack, Divider, IconButton, Dialog } from '@mui/material';
+import { Box, Typography, CardMedia, Button, Chip, Stack, Divider, IconButton, Dialog, TextField, Alert, Snackbar } from '@mui/material';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import CloseIcon from '@mui/icons-material/Close';
 import SwipeableViews from 'react-swipeable-views';
@@ -15,6 +15,8 @@ export default function ProductDetailPage() {
   const [zoomPos, setZoomPos] = useState({ x: 0.5, y: 0.5 });
   const autoPlayRef = useRef<number | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [note, setNote] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
 
   // Tự động chuyển ảnh mỗi 3s khi không hover và không zoom
   useEffect(() => {
@@ -33,6 +35,19 @@ export default function ProductDetailPage() {
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
     setZoomPos({ x, y });
+  };
+
+  // Thêm vào giỏ hàng
+  const handleAddToCart = () => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const idx = cart.findIndex((item: any) => item.product.id === product.id && item.note === note);
+    if (idx !== -1) {
+      cart[idx].quantity += quantity;
+    } else {
+      cart.push({ product, quantity, note });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    setShowAlert(true);
   };
 
   if (!product) {
@@ -131,9 +146,15 @@ export default function ProductDetailPage() {
               +
             </Button>
           </Stack>
-          <Button variant="contained" color="secondary" size="large" sx={{ fontWeight: 600, px: 4 }}>
+          
+          <Button variant="contained" color="secondary" size="large" sx={{ fontWeight: 600, px: 4 }} onClick={handleAddToCart}>
             Thêm vào giỏ hàng
           </Button>
+          <Snackbar open={showAlert} autoHideDuration={2000} onClose={() => setShowAlert(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            <Alert severity="success" sx={{ width: '100%' }} onClose={() => setShowAlert(false)}>
+              Đã thêm vào giỏ hàng!
+            </Alert>
+          </Snackbar>
         </Box>
       </Stack>
       <Divider sx={{ my: 3 }} />
