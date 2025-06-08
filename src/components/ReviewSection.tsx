@@ -125,6 +125,30 @@ export default function ReviewSection() {
     </Button>
     {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
     {success && <Alert severity="success" sx={{ mt: 2, width: '100%' }}>{success}</Alert>}
+    {success && (
+      <Box sx={{
+        position: 'fixed',
+        top: { xs: 24, md: 40 },
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1400,
+        bgcolor: '#fff',
+        color: '#e91e63',
+        px: 4,
+        py: 2,
+        borderRadius: 3,
+        boxShadow: 8,
+        border: '2px solid #e91e63',
+        fontWeight: 700,
+        fontSize: 18,
+        textAlign: 'center',
+        letterSpacing: 0.5,
+        transition: 'opacity 0.3s',
+        opacity: 1,
+      }}>
+        🎉 Bạn đã đánh giá thành công, shop cảm ơn người đẹp nha!
+      </Box>
+    )}
   </Box>
       <Box sx={{ position: 'relative' }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} justifyContent="center" alignItems="stretch">

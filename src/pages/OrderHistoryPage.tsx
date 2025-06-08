@@ -12,6 +12,7 @@ export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [tab, setTab] = useState<'placed' | 'delivered'>('placed');
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('current-user') || 'null');
@@ -30,86 +31,189 @@ export default function OrderHistoryPage() {
     }
   }, []);
 
-  if (!orders.length) {
-    return (
-      <Box sx={{ maxWidth: 600, mx: 'auto', mt: 6, p: 3, borderRadius: 4, boxShadow: 3, background: '#fff' }}>
-        <Typography align="center" color="text.secondary">Bạn chưa có đơn hàng nào.</Typography>
-      </Box>
-    );
-  }
+  // Phân loại đơn hàng
+  const ordersPlaced = orders.filter(o => o.status !== 'Đã giao hàng');
+  const ordersDelivered = orders.filter(o => o.status === 'Đã giao hàng');
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, mb: 6 }}>
+    <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4, mb: 6 }}>
       <Typography variant="h5" fontWeight={700} color="#e91e63" mb={3} align="center">
         Lịch sử đơn hàng
       </Typography>
-      <Stack spacing={3}>
-        {orders.map(order => (
-          <Paper key={order.id} sx={{ p: 3, borderRadius: 3, boxShadow: 2 }}>
-            <Typography fontWeight={600} color="#e91e63" mb={1}>
-              Đơn #{order.id} - {new Date(order.createdAt).toLocaleString('vi-VN')}
-            </Typography>
-            <Stepper activeStep={STATUS_STEPS.indexOf(order.status)} alternativeLabel sx={{ mb: 2 }}>
-              {STATUS_STEPS.map(label => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <Divider sx={{ mb: 1 }} />
-            {order.cart.map((item: any, idx: number) => (
-              <Box key={item.product.id + idx} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <img src={item.product.image} alt={item.product.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, marginRight: 10 }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography fontWeight={600}>{item.product.name}</Typography>
-                  <Typography color="text.secondary" fontSize={14}>
-                    SL: {item.quantity} x {item.product.price.toLocaleString()}₫
-                    {item.product.promotion && (
-                      <span style={{ color: '#43a047', marginLeft: 8 }}>
-                        (Giảm {item.product.promotion}% còn {(item.product.price * (1 - item.product.promotion / 100)).toLocaleString()}₫)
-                      </span>
-                    )}
-                  </Typography>
-                </Box>
-                <Typography fontWeight={700} color="#e91e63">
-                  {item.product.promotion
-                    ? (item.product.price * (1 - item.product.promotion / 100) * item.quantity).toLocaleString()
-                    : (item.product.price * item.quantity).toLocaleString()
-                  }₫
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, gap: 2 }}>
+        <Button
+          variant={tab === 'placed' ? 'contained' : 'outlined'}
+          color={tab === 'placed' ? 'secondary' : 'inherit'}
+          sx={{ fontWeight: 700, borderRadius: 3, px: 4, boxShadow: tab === 'placed' ? 3 : 0 }}
+          onClick={() => setTab('placed')}
+        >
+          Đơn hàng đã đặt
+        </Button>
+        <Button
+          variant={tab === 'delivered' ? 'contained' : 'outlined'}
+          color={tab === 'delivered' ? 'success' : 'inherit'}
+          sx={{ fontWeight: 700, borderRadius: 3, px: 4, boxShadow: tab === 'delivered' ? 3 : 0 }}
+          onClick={() => setTab('delivered')}
+        >
+          Đơn hàng đã giao
+        </Button>
+      </Box>
+      {tab === 'placed' && (
+        <Box>
+          <Typography variant="h6" fontWeight={700} color="#1976d2" mb={2}>
+            Đơn hàng đã đặt
+          </Typography>
+          <Stack spacing={3}>
+            {ordersPlaced.length === 0 ? (
+              <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 2, textAlign: 'center', color: 'text.secondary' }}>
+                Không có đơn nào đang xử lý.
+              </Paper>
+            ) : ordersPlaced.map(order => (
+              <Paper key={order.id} sx={{ p: 3, borderRadius: 3, boxShadow: 2 }}>
+                <Typography fontWeight={600} color="#e91e63" mb={1}>
+                  Đơn #{order.id} - {new Date(order.createdAt).toLocaleString('vi-VN')}
                 </Typography>
-              </Box>
+                <Stepper activeStep={STATUS_STEPS.indexOf(order.status)} alternativeLabel sx={{ mb: 2 }}>
+                  {STATUS_STEPS.map(label => (
+                    <Step key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+                <Divider sx={{ mb: 1 }} />
+                {order.cart.map((item: any, idx: number) => (
+                  <Box key={item.product.id + idx} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <img src={item.product.image} alt={item.product.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, marginRight: 10 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography fontWeight={600}>{item.product.name}</Typography>
+                      <Typography color="text.secondary" fontSize={14}>
+                        SL: {item.quantity} x {item.product.price.toLocaleString()}₫
+                        {item.product.promotion && (
+                          <span style={{ color: '#43a047', marginLeft: 8 }}>
+                            (Giảm {item.product.promotion}% còn {(item.product.price * (1 - item.product.promotion / 100)).toLocaleString()}₫)
+                          </span>
+                        )}
+                      </Typography>
+                    </Box>
+                    <Typography fontWeight={700} color="#e91e63">
+                      {item.product.promotion
+                        ? (item.product.price * (1 - item.product.promotion / 100) * item.quantity).toLocaleString()
+                        : (item.product.price * item.quantity).toLocaleString()
+                      }₫
+                    </Typography>
+                  </Box>
+                ))}
+                <Divider sx={{ my: 1 }} />
+                <Typography color="text.secondary" fontSize={14}>
+                  Tổng cộng: <b style={{ color: '#e91e63' }}>{order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0).toLocaleString()}₫</b>
+                  {order.discountApplied && (
+                    <Typography component="span" color="text.secondary" ml={1} fontWeight={600}>
+                      (Giảm 20%: -{(order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0) * 0.2).toLocaleString()}₫)
+                    </Typography>
+                  )}
+                  {order.couponApplied && (
+                    <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                      (Mã {order.couponApplied.code}: -{order.couponApplied.amount.toLocaleString()}₫)
+                    </Typography>
+                  )}
+                </Typography>
+                <Typography color="text.secondary" fontSize={14}>
+                  Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee?.toLocaleString()}₫</b>
+                </Typography>
+                <Typography color="text.secondary" fontSize={14} fontWeight={600}>
+                  Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal?.toLocaleString()}₫</b>
+                  {order.couponApplied && (
+                    <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                      (Đã áp dụng mã {order.couponApplied.code})
+                    </Typography>
+                  )}
+                </Typography>
+                <Button variant="outlined" color="secondary" sx={{ mt: 1 }} onClick={() => { setSelectedOrder(order); setOpenDetail(true); }}>
+                  Xem chi tiết
+                </Button>
+              </Paper>
             ))}
-            <Divider sx={{ my: 1 }} />
-            <Typography color="text.secondary" fontSize={14}>
-              Tổng cộng: <b style={{ color: '#e91e63' }}>{order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0).toLocaleString()}₫</b>
-              {order.discountApplied && (
-                <Typography component="span" color="text.secondary" ml={1} fontWeight={600}>
-                  (Giảm 20%: -{(order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0) * 0.2).toLocaleString()}₫)
+          </Stack>
+        </Box>
+      )}
+      {tab === 'delivered' && (
+        <Box>
+          <Typography variant="h6" fontWeight={700} color="#43a047" mb={2}>
+            Đơn hàng đã giao
+          </Typography>
+          <Stack spacing={3}>
+            {ordersDelivered.length === 0 ? (
+              <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 2, textAlign: 'center', color: 'text.secondary' }}>
+                Không có đơn nào đã giao.
+              </Paper>
+            ) : ordersDelivered.map(order => (
+              <Paper key={order.id} sx={{ p: 3, borderRadius: 3, boxShadow: 2 }}>
+                <Typography fontWeight={600} color="#e91e63" mb={1}>
+                  Đơn #{order.id} - {new Date(order.createdAt).toLocaleString('vi-VN')}
                 </Typography>
-              )}
-              {order.couponApplied && (
-                <Typography component="span" color="primary" ml={1} fontWeight={600}>
-                  (Mã {order.couponApplied.code}: -{order.couponApplied.amount.toLocaleString()}₫)
+                <Stepper activeStep={STATUS_STEPS.indexOf(order.status)} alternativeLabel sx={{ mb: 2 }}>
+                  {STATUS_STEPS.map(label => (
+                    <Step key={label}>
+                      <StepLabel>{label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+                <Divider sx={{ mb: 1 }} />
+                {order.cart.map((item: any, idx: number) => (
+                  <Box key={item.product.id + idx} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <img src={item.product.image} alt={item.product.name} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8, marginRight: 10 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography fontWeight={600}>{item.product.name}</Typography>
+                      <Typography color="text.secondary" fontSize={14}>
+                        SL: {item.quantity} x {item.product.price.toLocaleString()}₫
+                        {item.product.promotion && (
+                          <span style={{ color: '#43a047', marginLeft: 8 }}>
+                            (Giảm {item.product.promotion}% còn {(item.product.price * (1 - item.product.promotion / 100)).toLocaleString()}₫)
+                          </span>
+                        )}
+                      </Typography>
+                    </Box>
+                    <Typography fontWeight={700} color="#e91e63">
+                      {item.product.promotion
+                        ? (item.product.price * (1 - item.product.promotion / 100) * item.quantity).toLocaleString()
+                        : (item.product.price * item.quantity).toLocaleString()
+                      }₫
+                    </Typography>
+                  </Box>
+                ))}
+                <Divider sx={{ my: 1 }} />
+                <Typography color="text.secondary" fontSize={14}>
+                  Tổng cộng: <b style={{ color: '#e91e63' }}>{order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0).toLocaleString()}₫</b>
+                  {order.discountApplied && (
+                    <Typography component="span" color="text.secondary" ml={1} fontWeight={600}>
+                      (Giảm 20%: -{(order.cart.reduce((sum: number, i: any) => sum + i.product.price * i.quantity, 0) * 0.2).toLocaleString()}₫)
+                    </Typography>
+                  )}
+                  {order.couponApplied && (
+                    <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                      (Mã {order.couponApplied.code}: -{order.couponApplied.amount.toLocaleString()}₫)
+                    </Typography>
+                  )}
                 </Typography>
-              )}
-            </Typography>
-            <Typography color="text.secondary" fontSize={14}>
-              Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee?.toLocaleString()}₫</b>
-            </Typography>
-            <Typography color="text.secondary" fontSize={14} fontWeight={600}>
-              Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal?.toLocaleString()}₫</b>
-              {order.couponApplied && (
-                <Typography component="span" color="primary" ml={1} fontWeight={600}>
-                  (Đã áp dụng mã {order.couponApplied.code})
+                <Typography color="text.secondary" fontSize={14}>
+                  Phí ship: <b style={{ color: '#e91e63' }}>{order.shippingFee?.toLocaleString()}₫</b>
                 </Typography>
-              )}
-            </Typography>
-            <Button variant="outlined" color="secondary" sx={{ mt: 1 }} onClick={() => { setSelectedOrder(order); setOpenDetail(true); }}>
-              Xem chi tiết
-            </Button>
-          </Paper>
-        ))}
-      </Stack>
+                <Typography color="text.secondary" fontSize={14} fontWeight={600}>
+                  Tổng cuối cùng: <b style={{ color: '#e91e63' }}>{order.finalTotal?.toLocaleString()}₫</b>
+                  {order.couponApplied && (
+                    <Typography component="span" color="primary" ml={1} fontWeight={600}>
+                      (Đã áp dụng mã {order.couponApplied.code})
+                    </Typography>
+                  )}
+                </Typography>
+                <Button variant="outlined" color="secondary" sx={{ mt: 1 }} onClick={() => { setSelectedOrder(order); setOpenDetail(true); }}>
+                  Xem chi tiết
+                </Button>
+              </Paper>
+            ))}
+          </Stack>
+        </Box>
+      )}
       {/* Dialog chi tiết đơn hàng */}
       <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Chi tiết đơn hàng</DialogTitle>
