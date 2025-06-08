@@ -60,9 +60,6 @@ export default function OrderHistoryPage() {
       </Box>
       {tab === 'placed' && (
         <Box>
-          <Typography variant="h6" fontWeight={700} color="#1976d2" mb={2}>
-            Đơn hàng đã đặt
-          </Typography>
           <Stack spacing={3}>
             {ordersPlaced.length === 0 ? (
               <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 2, textAlign: 'center', color: 'text.secondary' }}>
@@ -138,9 +135,6 @@ export default function OrderHistoryPage() {
       )}
       {tab === 'delivered' && (
         <Box>
-          <Typography variant="h6" fontWeight={700} color="#43a047" mb={2}>
-            Đơn hàng đã giao
-          </Typography>
           <Stack spacing={3}>
             {ordersDelivered.length === 0 ? (
               <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 2, textAlign: 'center', color: 'text.secondary' }}>
