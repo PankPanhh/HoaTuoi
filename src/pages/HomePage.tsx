@@ -216,7 +216,7 @@ export default function HomePage() {
       )}
       {/* Danh mục nổi bật */}
       <Container maxWidth="md" sx={{ mb: 4 }}>
-        <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2}>
+        <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2} sx={{ fontSize: { xs: 25, md: 29 } }}>
           Danh mục nổi bật
         </Typography>
         <Stack direction="row" spacing={1.2} flexWrap="wrap" justifyContent="center">
@@ -258,10 +258,10 @@ export default function HomePage() {
       </Container>
       {/* Sản phẩm mới */}
       <Container maxWidth="md" sx={{ mb: 4 }}>
-        <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2}>
+        <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2} sx={{ fontSize: { xs: 25, md: 29 } }}>
           Sản phẩm mới
         </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, justifyContent: 'center' }}>
           {featuredFlowers.map((flower) => (
             <Box key={flower.id || flower.name} sx={{ width: { xs: '100%', sm: '50%', md: '33.333%' }, display: 'flex', p: 1, boxSizing: 'border-box' }}>
               <Card sx={{ borderRadius: 4, boxShadow: 4, height: 380, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
@@ -304,10 +304,10 @@ export default function HomePage() {
       </Container>
       {/* Sản phẩm khuyến mãi */}
       <Container maxWidth="md" sx={{ mb: 4 }}>
-        <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2}>
+        <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2} sx={{ fontSize: { xs: 25, md: 29 } }}>
           Sản phẩm khuyến mãi
         </Typography>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, justifyContent: 'center' }}>
           {promotedFlowers.map((flower) => (
             <Box key={flower.id || flower.name} sx={{ width: { xs: '100%', sm: '50%', md: '33.333%' }, display: 'flex', p: 1, boxSizing: 'border-box' }}>
               <Card sx={{ borderRadius: 4, boxShadow: 4, height: 380, width: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.2s', '&:hover': { transform: 'scale(1.08)', boxShadow: 8 } }}>
@@ -350,7 +350,7 @@ export default function HomePage() {
       <Container maxWidth="md" sx={{ mb: 4 }}>
         {/* Header blog với mô tả và menu ngang chủ đề */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2}>
+          <Typography variant="h5" fontWeight={600} color="#e91e63" mb={2} sx={{ fontSize: { xs: 25, md: 29 } }}>
             Blog/ Tin tức
           </Typography>
         </Box>

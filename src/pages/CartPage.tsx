@@ -59,6 +59,7 @@ export default function CartPage() {
     updateCart(newCart);
   };
 
+  // Khi chuyển sang trang thanh toán, nếu đã dùng mã SALE30 thì xóa mã khỏi localStorage và input, không áp dụng mã khi sang trang Checkout.
   const handleCheckout = () => {
     if (!user) {
       setError('Vui lòng đăng nhập để đặt hàng!');
@@ -67,6 +68,24 @@ export default function CartPage() {
     if (cart.length === 0) {
       setError('Giỏ hàng trống!');
       return;
+    }
+    // Kiểm tra lại mã SALE30 trước khi sang trang checkout
+    if (coupon.trim().toUpperCase() === 'SALE30') {
+      const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+      const userOrders = orders[user.email] || [];
+      const hasUsedSale30 = userOrders.some((o: any) => o.couponApplied && o.couponApplied.code === 'SALE30');
+      if (hasUsedSale30) {
+        setCouponError('Bạn đã sử dụng mã SALE30 cho đơn hàng trước đó. Không thể áp dụng lại.');
+        setCouponDiscount(0);
+        localStorage.removeItem('cart-coupon');
+        setCoupon('');
+        // Sau khi xóa mã, vẫn cho chuyển sang trang checkout (không áp dụng mã)
+        setTimeout(() => {
+          setCouponError('');
+          navigate('/checkout');
+        }, 600);
+        return;
+      }
     }
     navigate('/checkout');
   };
@@ -81,8 +100,21 @@ export default function CartPage() {
   const handleApplyCoupon = () => {
     setCouponError('');
     setCouponSuccess('');
-    // Ví dụ: chỉ hỗ trợ mã SALE30 giảm 30%
     if (coupon.trim().toUpperCase() === 'SALE30') {
+      if (!user) {
+        setCouponError('Bạn cần đăng nhập để sử dụng mã giảm giá.');
+        setCouponDiscount(0);
+        return;
+      }
+      const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+      const userOrders = orders[user.email] || [];
+      const hasUsedSale30 = userOrders.some((o: any) => o.couponApplied && o.couponApplied.code === 'SALE30');
+      if (hasUsedSale30) {
+        setCouponError('Bạn đã sử dụng mã SALE30 cho đơn hàng trước đó. Không thể áp dụng lại.');
+        setCouponDiscount(0);
+        // Không xóa mã khỏi ô nhập, chỉ không áp dụng discount
+        return;
+      }
       setCouponDiscount(0.3);
       setCouponSuccess('Áp dụng mã giảm giá thành công!');
     } else {

@@ -97,23 +97,42 @@ export default function ReviewSection() {
       <Typography variant="h5" fontWeight={700} color="#e91e63" align="center" mb={3}>
         Đánh giá từ khách hàng
       </Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 420, mx: 'auto', mb: 4, p: 3, bgcolor: '#fff', borderRadius: 4, boxShadow: 3 }}>
-        <Typography fontWeight={600} mb={2} color="#e91e63">Gửi đánh giá của bạn</Typography>
-        <TextField label="Tên của bạn" value={form.name} onChange={e => handleChange('name', e.target.value)} fullWidth sx={{ mb: 2 }} />
-        <Rating value={form.rating} onChange={(_, v) => handleChange('rating', v || 0)} sx={{ mb: 2 }} />
-        <TextField label="Bình luận" value={form.comment} onChange={e => handleChange('comment', e.target.value)} fullWidth multiline minRows={2} sx={{ mb: 2 }} />
-        <TextField label="Link avatar (tùy chọn)" value={form.avatar} onChange={e => handleChange('avatar', e.target.value)} fullWidth sx={{ mb: 2 }} />
-        <Button type="submit" variant="contained" color="secondary" sx={{ fontWeight: 700, borderRadius: 2, px: 4 }}>Gửi đánh giá</Button>
-        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
-      </Box>
+      <Box component="form" onSubmit={handleSubmit} sx={{
+    maxWidth: 440,
+    mx: 'auto',
+    mb: 5,
+    p: 4,
+    bgcolor: 'linear-gradient(135deg, #fffbe7 60%, #ffe0ec 100%)',
+    borderRadius: 5,
+    boxShadow: '0 4px 32px #e91e6322',
+    border: '2px solid #e91e63',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    position: 'relative',
+    transition: 'box-shadow 0.2s',
+    '&:hover': { boxShadow: '0 8px 40px #e91e6344' },
+  }}>
+    <Typography fontWeight={700} mb={2} color="#e91e63" sx={{ fontSize: 22, letterSpacing: 0.5, textShadow: '0 2px 8px #fff' }}>
+      Gửi đánh giá của bạn
+    </Typography>
+    <TextField label="Tên của bạn" value={form.name} onChange={e => handleChange('name', e.target.value)} fullWidth sx={{ mb: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: 1 }} />
+    <Rating value={form.rating} onChange={(_, v) => handleChange('rating', v || 0)} sx={{ mb: 2, '& .MuiRating-icon': { fontSize: 38, color: '#ff9800', textShadow: '0 2px 8px #fffbe7' } }} />
+    <TextField label="Bình luận" value={form.comment} onChange={e => handleChange('comment', e.target.value)} fullWidth multiline minRows={2} sx={{ mb: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: 1 }} />
+    <TextField label="Link avatar (tùy chọn)" value={form.avatar} onChange={e => handleChange('avatar', e.target.value)} fullWidth sx={{ mb: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: 1 }} />
+    <Button type="submit" variant="contained" color="secondary" sx={{ fontWeight: 700, borderRadius: 3, px: 5, py: 1.2, fontSize: 17, boxShadow: 3, letterSpacing: 0.5, background: 'linear-gradient(90deg, #e91e63 60%, #ff9800 100%)', color: '#fff', '&:hover': { background: 'linear-gradient(90deg, #ff9800 60%, #e91e63 100%)', boxShadow: 6, transform: 'scale(1.04)' } }}>
+      Gửi đánh giá
+    </Button>
+    {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
+    {success && <Alert severity="success" sx={{ mt: 2, width: '100%' }}>{success}</Alert>}
+  </Box>
       <Box sx={{ position: 'relative' }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} justifyContent="center" alignItems="stretch">
           {pagedReviews.map((r, idx) => (
             <Paper key={idx + (showAll ? page * REVIEWS_PER_PAGE : 0)} sx={{ p: 3, borderRadius: 4, minWidth: 260, maxWidth: 320, flex: 1, boxShadow: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#fff' }}>
               <Avatar src={r.avatar} alt={r.name} sx={{ width: 64, height: 64, mb: 1.5, boxShadow: 2 }} />
               <Typography fontWeight={700} color="#e91e63" mb={0.5}>{r.name}</Typography>
-              <Rating value={r.rating} readOnly sx={{ mb: 1 }} />
+              <Rating value={r.rating} readOnly sx={{ mb: 1, '& .MuiRating-icon': { fontSize: 25 } }} />
               <Typography color="text.secondary" fontSize={15} mb={1} align="center">"{r.comment}"</Typography>
               <Typography variant="caption" color="text.disabled">{r.date}</Typography>
             </Paper>

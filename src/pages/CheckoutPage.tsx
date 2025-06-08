@@ -91,6 +91,21 @@ export default function CheckoutPage() {
     setCouponError('');
     setCouponSuccess('');
     if (coupon.trim().toUpperCase() === 'SALE30') {
+      // Kiểm tra user đã từng dùng mã SALE30 chưa
+      if (!user) {
+        setCouponError('Bạn cần đăng nhập để sử dụng mã giảm giá.');
+        setCouponDiscount(0);
+        return;
+      }
+      const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+      const userOrders = orders[user.email] || [];
+      const hasUsedSale30 = userOrders.some((o: any) => o.couponApplied && o.couponApplied.code === 'SALE30');
+      if (hasUsedSale30) {
+        setCouponError('Bạn chỉ được sử dụng mã SALE30 cho 1 đơn hàng đầu tiên.');
+        setCouponDiscount(0);
+        localStorage.removeItem('cart-coupon');
+        return;
+      }
       setCouponDiscount(0.3);
       setCouponSuccess('Áp dụng mã giảm giá thành công!');
       localStorage.setItem('cart-coupon', JSON.stringify({ code: 'SALE30', discount: 0.3 }));
@@ -138,8 +153,18 @@ export default function CheckoutPage() {
       return;
     }
     setLoading(true);
-    // Lưu coupon vào đơn hàng nếu có
-    const couponInfo = couponDiscount > 0 ? { code: coupon, percent: couponDiscount * 100, amount: couponAmount, note: 'Đã áp dụng mã giảm giá SALE30.' } : null;
+    // Kiểm tra lại mã SALE30 trước khi lưu đơn
+    let couponInfo = null;
+    if (couponDiscount > 0 && coupon.trim().toUpperCase() === 'SALE30') {
+      const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+      const userOrders = orders[user.email] || [];
+      const hasUsedSale30 = userOrders.some((o: any) => o.couponApplied && o.couponApplied.code === 'SALE30');
+      if (!hasUsedSale30) {
+        couponInfo = { code: coupon, percent: couponDiscount * 100, amount: couponAmount, note: 'Đã áp dụng mã giảm giá SALE30.' };
+      } else {
+        couponInfo = null;
+      }
+    }
     if (form.paymentMethod === 'online') {
       setTimeout(async () => {
         setLoading(false);
@@ -297,12 +322,12 @@ export default function CheckoutPage() {
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, mb: 6 }}>
       <Paper elevation={4} sx={{ borderRadius: 4, p: { xs: 2, sm: 4 }, background: 'linear-gradient(135deg, #fffbe7 60%, #ffe0ec 100%)' }}>
-        <Typography variant="h5" fontWeight={700} color="#e91e63" mb={2} align="center">
+        <Typography variant="h5" fontWeight={700} color="#e91e63" mb={2} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
           🌸 Đặt hoa & Gửi yêu thương 🌸
         </Typography>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems="flex-start">
           {/* Form đặt hàng */}
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 320 }}>
             <form onSubmit={handleOrder}>
               {/* Người nhận */}
               <Typography fontWeight={700} color="text.secondary" mb={1}>Thông tin người nhận</Typography>
@@ -450,7 +475,7 @@ export default function CheckoutPage() {
           </Box>
 
           {/* Tóm tắt đơn hàng */}
-          <Box sx={{ flex: 1, bgcolor: '#fff', borderRadius: 3, boxShadow: 2, p: 3 }}>
+          <Box sx={{ flex: 1, bgcolor: '#fff', borderRadius: 3, boxShadow: 2, p: 3, minWidth: 320 }}>
             <Typography fontWeight={600} mb={2} color="#e91e63">🧾 Tóm tắt đơn hàng</Typography>
             <Divider sx={{ mb: 2 }} />
             {cart.map((item, idx) => (

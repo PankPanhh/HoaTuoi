@@ -1,3 +1,18 @@
+body, html, #root {
+  font-family: 'Roboto', 'Arial', 'Helvetica Neue', Helvetica, Tahoma, 'Segoe UI', 'sans-serif';
+  font-size: 16px;
+  color: #222;
+  background: #faf9f6;
+  direction: ltr;
+}
+
+/* Ưu tiên font Roboto, Arial, Helvetica, Tahoma, Segoe UI đều hỗ trợ tốt tiếng Việt */
+
+/* Đảm bảo các thành phần MUI cũng dùng font này */
+.MuiTypography-root, .MuiButton-root, .MuiInputBase-root, .MuiFormLabel-root, .MuiAlert-root {
+  font-family: inherit !important;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
