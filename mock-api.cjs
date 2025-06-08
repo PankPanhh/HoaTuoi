@@ -73,6 +73,12 @@ app.post('/api/save-current-user', (req, res) => {
     db = { users: [] };
   }
   if (!Array.isArray(db.users)) db.users = [];
+  // Nếu hardDelete: true thì xóa hoàn toàn user khỏi db
+  if (user.hardDelete) {
+    db.users = db.users.filter(u => u.email !== user.email);
+    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+    return res.json({ message: 'Đã xóa hoàn toàn user.' });
+  }
   const idx = db.users.findIndex(u => u.email === user.email);
   if (idx !== -1) {
     // Giữ lại orderHistory cũ nếu có

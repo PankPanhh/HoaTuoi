@@ -90,15 +90,38 @@ export default function ProfilePage() {
   const handleDelete = async () => {
     setError(''); setSuccess(''); setLoading(true);
     try {
-      // Xóa user khỏi mock-db (giả lập: set rỗng)
+      // Xóa user khỏi mock-db (xóa hoàn toàn user khỏi file json)
       const res = await fetch('/api/save-current-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user?.email, deleted: true }),
+        body: JSON.stringify({ email: user?.email, deleted: true, hardDelete: true }),
       });
       if (!res.ok) throw new Error('Xóa thất bại');
+      // Xóa toàn bộ dữ liệu liên quan đến user khỏi localStorage
+      if (user?.email) {
+        // Xóa orders
+        const orders = JSON.parse(localStorage.getItem('orders') || '{}');
+        delete orders[user.email];
+        localStorage.setItem('orders', JSON.stringify(orders));
+        // Xóa last-order nếu là của user này
+        const lastOrder = localStorage.getItem('last-order');
+        if (lastOrder) {
+          const lo = JSON.parse(lastOrder);
+          if (lo?.form?.senderEmail === user.email) localStorage.removeItem('last-order');
+        }
+        // Xóa current-user
+        localStorage.removeItem('current-user');
+        // Xóa cart
+        localStorage.removeItem('cart');
+        // Xóa cart-coupon
+        localStorage.removeItem('cart-coupon');
+      }
       logout();
       setSuccess('Tài khoản đã bị xóa.');
+      // Quay về trang chủ sau khi xóa tài khoản
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1200);
     } catch {
       setError('Không thể xóa tài khoản.');
     } finally {
@@ -119,12 +142,31 @@ export default function ProfilePage() {
         Quản lý tài khoản
       </Typography>
       {!editMode ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography><b>Họ tên:</b> {user.name}</Typography>
-          <Typography><b>Email:</b> {user.email}</Typography>
-          <Typography><b>Số điện thoại:</b> {user.phone}</Typography>
-          <Typography><b>Địa chỉ:</b> {user.address || 'Chưa cập nhật'}</Typography>
-          <Button variant="contained" color="secondary" sx={{ mt: 2, fontWeight: 600 }} onClick={() => setEditMode(true)}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
+          <Typography align="left"><b>Họ tên:</b> {user.name}</Typography>
+          <Typography align="left"><b>Email:</b> {user.email}</Typography>
+          <Typography align="left"><b>Số điện thoại:</b> {user.phone}</Typography>
+          <Typography align="left"><b>Địa chỉ:</b> {user.address || 'Chưa cập nhật'}</Typography>
+          <Button variant="contained" color="secondary" sx={{ mt: 2, fontWeight: 600, alignSelf: 'stretch' }} onClick={() => {
+            let addressDetail = '', ward = '', district = '', province = '';
+            if (user.address) {
+              const parts = user.address.split(',').map(s => s.trim());
+              addressDetail = parts[0] || '';
+              ward = parts[1] || '';
+              district = parts[2] || '';
+              province = parts[3] || '';
+            }
+            setForm({
+              name: user.name || '',
+              email: user.email || '',
+              phone: user.phone || '',
+              addressDetail,
+              ward,
+              district,
+              province,     
+            });
+            setEditMode(true);
+          }}>
             Sửa thông tin
           </Button>
         </Box>

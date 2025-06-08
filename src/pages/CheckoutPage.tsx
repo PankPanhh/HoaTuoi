@@ -322,7 +322,7 @@ export default function CheckoutPage() {
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, mb: 6 }}>
       <Paper elevation={4} sx={{ borderRadius: 4, p: { xs: 2, sm: 4 }, background: 'linear-gradient(135deg, #fffbe7 60%, #ffe0ec 100%)' }}>
-        <Typography variant="h5" fontWeight={700} color="#e91e63" mb={2} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+        <Typography variant="h5" fontWeight={700} color="#e91e63" mb={2} sx={{ textAlign: { xs: 'center', md: 'center' } }}>
           🌸 Đặt hoa & Gửi yêu thương 🌸
         </Typography>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems="flex-start">
@@ -396,7 +396,7 @@ export default function CheckoutPage() {
                   />
                 }
                 label="Bạn có muốn ẩn thông tin cá nhân của mình để tạo sự tò mò cho người ấy không?"
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, alignItems: 'flex-start', '.MuiFormControlLabel-label': { textAlign: 'left' } }}
               />
 
               {/* Chọn hình thức thanh toán */}
