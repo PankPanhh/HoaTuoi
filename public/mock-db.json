@@ -1,3 +1,14 @@
 {
-  "users": []
+  "users": [
+    {
+      "id": 1,
+      "name": "PankPanhh",
+      "email": "nguyenphuonganh061024@gmail.com",
+      "password": "123",
+      "phone": "0901389609",
+      "address": "223/12 Lê Minh Nhựt, Xã Tân Thông Hội, Huyện Củ Chi, Thành phố Hồ Chí Minh",
+      "orderHistory": [],
+      "role": "customer"
+    }
+  ]
 }

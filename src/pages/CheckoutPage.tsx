@@ -568,13 +568,13 @@ export default function CheckoutPage() {
                 value={coupon}
                 onChange={e => setCoupon(e.target.value)}
                 sx={{ width: 220 }}
-                disabled={!!couponDiscount}
+                disabled={!!couponDiscount || !!localStorage.getItem('cart-coupon')}
               />
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={handleApplyCoupon}
-                disabled={!!couponDiscount || !coupon.trim()}
+                disabled={!!couponDiscount || !coupon.trim() || !!localStorage.getItem('cart-coupon')}
                 sx={{ fontWeight: 700, borderRadius: 2 }}
               >
                 Áp dụng
